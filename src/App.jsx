@@ -1,12 +1,9 @@
-import './App.css'
-
+import Routerr from "./router/Routerr"
 function App() {
-
-
-  return (
+return (
     <>
- <h2>Hello from - Main</h2>
- <h2>Hello from -Rana</h2>
+    {/* <h2>test</h2> */}
+<Routerr></Routerr>
     </>
   )
 }
