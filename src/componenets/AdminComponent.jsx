@@ -1,10 +1,9 @@
 import React from 'react'
-// import AdminPage from '../pages/AdminPage'
+import AdminPage from '../pages/AdminPage'
 function AdminComponent() {
   return (
 <>
-{/* <AdminPage></AdminPage> */}
-test
+<AdminPage></AdminPage>
 </>
   )
 }

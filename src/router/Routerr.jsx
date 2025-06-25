@@ -7,6 +7,11 @@ import SignUpComponenet from '../componenets/SignUpComponenet';
 import SignInComponent from '../componenets/SignInComponent';
 import AdminComponent from '../componenets/AdminComponent';
 import PrincpleComponent from '../componenets/PrincpleComponent';
+import ViewUsersComponent from '../componenets/ViewUsersComponent';
+import ViewClassComponent from '../componenets/ViewClassComponent';
+// import AdminSigdbar from '../componenets/AdminSigdbar';
+import AdminPageClass from '../pages/AdminPageClass';
+import LeavesPage from '../pages/LeavesPage';
 // create layout
 function Layout() {
   return (
@@ -33,12 +38,28 @@ element:<SignUpComponenet></SignUpComponenet>
         },
         {
             path:"/Admin",
-            element:<AdminComponent></AdminComponent>
+            element:<AdminComponent></AdminComponent>,
+        },
+        {
+          path:"/AdminCreateClass",
+          element:<AdminPageClass></AdminPageClass>
         },
         {
             path:"/Princple",
             element:<PrincpleComponent></PrincpleComponent>
-        }
+        },
+        {
+          path:"/Viewusers",
+          element:<ViewUsersComponent></ViewUsersComponent>
+        },
+        {
+          path:"/viewclass",
+          element:<ViewClassComponent></ViewClassComponent>
+},
+{
+  path:"/leaves-action",
+  element:<LeavesPage></LeavesPage>
+}
     ]
   },
 ]);
