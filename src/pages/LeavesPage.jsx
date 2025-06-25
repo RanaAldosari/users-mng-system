@@ -1,52 +1,67 @@
-import React from 'react'
-import Swal from 'sweetalert2'
-// accept||rejectr leaves & display into users pages
-function LeavesPage() {
-// accept
-  function AcceptLeaves(){
-    Swal.fire({
-      icon: 'success',
-      title: 'Accepted Successfully',
-      timer: 1500,
-      showConfirmButton: false
-    });
-  }
-// reject
-  function RejectLeaves(){
-    Swal.fire({
-      title: 'Rejected Reason',
-      input: 'text',
-      inputPlaceholder: ' Please Write the rejected resone',
-      showCancelButton: true,
-      confirmButtonText: 'send',
-      cancelButtonText: 'cancel',
-      inputValidator: (value) => {
-        if (!value) {
-          return 'rejected reasone'
-        }
-      }
-    }).then((result) => {
-      if (result.isConfirmed) {
-        Swal.fire({
-          icon: 'info',
-          title: 'rejected is sended',
-          text: `reasone is:${result.value}`,
-          timer: 2000,
-          showConfirmButton: false
-        })
-      }
-    })
-  }
+// import React, { useState, useEffect } from 'react';
+// import axios from 'axios';
+// import Swal from 'sweetalert2';
 
-  return (
-    <>
-    <div className='border p-4 space-y-3 max-w-md'>
-      <p>Lorem ipsum dolor sit amet consectetur adipisicing elit. Fuga, sint. Praesentium nisi veritatis illo, labore, quibusdam impedit quaerat dicta et voluptatem quisquam, odit nam cumque incidunt velit optio quae consequuntur!</p>
-      <button onClick={AcceptLeaves} className='bg-green-400 text-white px-4 py-1 rounded mr-3'>Accept</button>
-      <button onClick={RejectLeaves} className='bg-red-500 text-white px-4 py-1 rounded'>Reject</button>
-    </div>
-      </>
-  )
-}
+// const BASE_URL = 'https://student-management-system-pnb9.onrender.com';
 
-export default LeavesPage
+// function LeavesPage({ userId, classId }) {
+//   const [leaves, setLeaves] = useState([]);
+//   const [loading, setLoading] = useState(false);
+
+//   const token = localStorage.getItem("token");
+
+//   useEffect(() => {
+//     const getLeaves = async () => {
+//       try {
+//         setLoading(true);
+// // by id
+//         let url = '';
+//         if (classId) {
+//           url = `${BASE_URL}/classes/${classId}/leaves`;
+//         } else if (userId) {
+//           url = `${BASE_URL}/users/${userId}/leaves`;
+//         } else {
+//           Swal.fire('Error', 'Please provide either userId or classId', 'error');
+//           setLoading(false);
+//           return;
+//         }
+
+//         const res = await axios.get(url, {
+//           headers: { Authorization: `Bearer ${token}` }
+//         });
+
+//         setLeaves(res.data);
+//       } catch (error) {
+//         console.error('Failed to fetch leaves:', error.response || error.message);
+//         Swal.fire('Error', 'Failed to load leaves', 'error');
+//       } finally {
+//         setLoading(false);
+//       }
+//     };
+
+//     getLeaves();
+//   }, [userId, classId, token]);
+
+//   if (loading) return <p>Loading...</p>;
+
+//   return (
+//     <>
+//     <div>
+//       <h2>Leaves</h2>
+//       {leaves.length === 0 ? (
+//         <p>No leaves found.</p>
+//       ) : (
+//         <ul>
+//           {leaves.map((leave) => (
+//             <li key={leave.id}>
+//               Date: {leave.leaveAt} - Type: {leave.leaveType} - Status: {leave.status}
+//             </li>
+//           ))}
+//         </ul>
+//       )}
+//     </div>
+//       </>
+//   );
+// }
+
+// export default LeavesPage;

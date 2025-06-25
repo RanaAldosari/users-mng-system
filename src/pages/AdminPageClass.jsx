@@ -1,129 +1,153 @@
-import axios from 'axios'
-import React, { useEffect, useState } from 'react'
-import { useNavigate } from 'react-router'
-//will be create class
-function AdminPageClass() {
-  const [className, setClassName] = useState("")
-  const [teacherId, setTeacherId] = useState("")
-  const [studentsList, setStudentsList] = useState([])
-  const [teachersList, setTeachersList] = useState([])
-  const [selectedStudents, setSelectedStudents] = useState([])
-  const navigate = useNavigate()
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
+import { useNavigate } from 'react-router';
 
-  const apiUsers = "https://68219a91259dad2655afc3cc.mockapi.io/api/users/user"
-  const apiTeachers = "https://68219a91259dad2655afc3cc.mockapi.io/api/users/image"
+function AdminPageClass() {
+  const [className, setClassName] = useState('');
+  const [teacherId, setTeacherId] = useState('');
+  const [studentsList, setStudentsList] = useState([]);
+  const [teachersList, setTeachersList] = useState([]);
+  const [adminsList, setAdminsList] = useState([]);
+  const [selectedStudents, setSelectedStudents] = useState([]);
+  const navigate = useNavigate();
+
+  // const BASE_URL = 'https://student-management-system-pnb9.onrender.com/api';
+  const BASE_URL = 'https://student-management-system-pnb9.onrender.com';
+
+  const token = localStorage.getItem('token');
 
   useEffect(() => {
-    axios.get(apiUsers)
-      .then(res => setStudentsList(res.data))
-      .catch(err => console.log(err))
-
-    axios.get(apiTeachers)
-      .then(res => {
-        const teachersOnly = res.data.filter(user => user.role === "teacher")
-        setTeachersList(teachersOnly)
-      })
-      .catch(err => console.log(err))
-  }, [])
+    axios.get(`${BASE_URL}/users`, {
+      headers: {
+        Authorization: `Bearer ${token}`
+      }
+    })
+.then(res => {
+      const users = res.data;
+      setStudentsList(users.filter(user => user.role === 'student').slice(0, 20)); 
+      setTeachersList(users.filter(user => user.role === 'teacher').slice(0, 2));
+      setAdminsList(users.filter(user => user.role === 'admin'));
+    })
+    
+    .catch(err => console.error('Error fetching users:', err));
+}, [token]);
 
   const handleStudent = (id) => {
-    setSelectedStudents(item =>
-      item.includes(id)
-        ? item.filter(sid => sid !== id)
-        : [...item, id]
-    )
-  }
+    setSelectedStudents(prev =>
+      prev.includes(id)
+        ? prev.filter(sid => sid !== id)
+        : [...prev, id]
+    );
+  };
 
-  const CreateClass = () => {
-    if (!className || !teacherId || selectedStudents.length === 0) {
-      alert("all fields are requied")
-      return
+  const CreateClass = async () => {
+    if (!className || !teacherId || selectedStudents.length !== 20) {
+      alert('All fields are required and you must select exactly 20 students.');
+      return;
     }
 
-    const selectedStudentNames = studentsList
-      .filter(s => selectedStudents.includes(s.id))
-      .map(s => s.email)
+    try {
+// create class
+      const classRes = await axios.post(`${BASE_URL}/classes`, {
+        name: className
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
 
-    const selectedTeacher = teachersList.find(t => t.id === teacherId)
+      const classId = classRes.data._id;
+// add teachers
+      await axios.post(`${BASE_URL}/classes/${classId}/teachers`, {
+        teacherIds: [teacherId]
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
+// add students
+      await axios.post(`${BASE_URL}/classes/${classId}/students`, {
+        studentIds: selectedStudents
+      }, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        }
+      });
 
-    const classData = {
-      name: className,
-      role: "class",
-      students: selectedStudentNames,
-      teachers: [selectedTeacher.name]
+      alert('Class created successfully!');
+      navigate('/viewclass');
+    } catch (err) {
+       console.error('Failed to create class:', err.response?.data || err.message);
+      console.error('Failed to create class:', err);
+      alert('failed to create class');
     }
-
-    axios.post(apiTeachers, classData)
-      .then(() => {
-        alert("Class created successfully!")
-        navigate("/viewclass")
-      })
-      .catch(err => {
-        console.error(err)
-        alert("Failed to create class,please try again")
-      })
-  }
+  };
 
   return (
-    <>
-    <div>
-      <h2 className="text-xl font-bold">Create a New Class</h2>
-
-      {/* Class name */}
-      <div>
-        <label>Class Name:</label>
+    <div className="max-w-xl mx-auto mt-6">
+      <h2 className="text-2xl font-bold mb-4">Create a New Class</h2>
+{/* class */}
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Class Name:</label>
         <input
           type="text"
-          className="border px-2 py-1 w-full"
+          className="border px-3 py-2 w-full"
           value={className}
           onChange={(e) => setClassName(e.target.value)}
         />
       </div>
-
-      {/* Select teacher */}
-      <div>
-        <label>Assign Teacher:</label>
+{/* display teacher */}
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Assign Teacher:</label>
         <select
           value={teacherId}
           onChange={(e) => setTeacherId(e.target.value)}
-          className="border px-2 py-1 w-full"
+          className="border px-3 py-2 w-full"
         >
           <option value="">Select Teacher</option>
           {teachersList.map(t => (
-            <option key={t.id} value={t.id}>{t.name}</option>
+            <option key={t._id} value={t._id}>
+              {t.name || t.email}
+            </option>
           ))}
         </select>
       </div>
-
-      {/* Select Students */}
-      <div>
-        <label>Assign Students:</label>
-        <div className="grid grid-cols-2 gap-2">
+{/* display students */}
+      <div className="mb-4">
+        <label className="block mb-1 font-medium">Assign Students:</label>
+        <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto border p-2">
           {studentsList.map(student => (
-            <label key={student.id} className="flex items-center">
+            <label key={student._id} className="flex items-center">
               <input
                 type="checkbox"
-                value={student.id}
-                checked={selectedStudents.includes(student.id)}
-                onChange={() => handleStudent(student.id)}
+                value={student._id}
+                checked={selectedStudents.includes(student._id)}
+                onChange={() => handleStudent(student._id)}
+                disabled={
+                  !selectedStudents.includes(student._id) &&
+                  selectedStudents.length >= 20
+                }
                 className="mr-2"
               />
               {student.email}
             </label>
           ))}
         </div>
+        <p className="text-sm text-gray-500 mt-1">
+          {selectedStudents.length}/20 selected
+        </p>
       </div>
 
-      {/* Submit Button */}
+     
+
       <button
         onClick={CreateClass}
-        className="bg-green-600 text-white px-4 py-2 rounded"
+        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
       >
         Create Class
       </button>
     </div>
-      </>
-  )
+  );
 }
 
-export default AdminPageClass
+export default AdminPageClass;
