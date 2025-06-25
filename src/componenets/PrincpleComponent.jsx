@@ -1,10 +1,9 @@
 import React from 'react'
-// import PrincplePage from '../pages/PrincplePage'
+import PrincplePage from '../pages/PrincplePage'
 function PrincpleComponent() {
   return (
  <>
- princple
- {/* <PrincplePage></PrincplePage> */}
+ <PrincplePage></PrincplePage>
  </>
   )
 }

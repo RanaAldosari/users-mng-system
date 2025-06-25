@@ -3,6 +3,7 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router';
 // create users account => added in viewUsres pg
 // princple***
+// report***
 function AdminPage() {
   const [addTeacher, setAddTeacher] = useState('');
   const [addPrincipal, setAddPrincipal] = useState('');
