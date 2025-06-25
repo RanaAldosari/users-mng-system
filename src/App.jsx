@@ -1,9 +1,9 @@
-import Routerr from "./router/Routerr"
+import Router11 from "./router/Router11"
 function App() {
 return (
     <>
-    {/* <h2>test</h2> */}
-<Routerr></Routerr>
+      <Router11 />
+
     </>
   )
 }
