@@ -1,3 +1,4 @@
+// src/componenets/NabBar.jsx
 import React, { useState, useEffect } from "react";
 import { Link, useNavigate, useLocation } from "react-router";
 import { FaBars, FaTimes } from "react-icons/fa";
@@ -11,33 +12,41 @@ export default function Navbar() {
   const location = useLocation();
 
   useEffect(() => {
-    const handleCheckUser = () => {
-      const token = localStorage.getItem("token");
-      if (token) {
-        const parsedUser = JSON.parse(localStorage.getItem("user"));
-        setUser(parsedUser);
-      } else {
-        setUser(null);
+    const token = localStorage.getItem("token");
+    if (token) {
+      // Safely parse stored user JSON (if any)
+      const stored = localStorage.getItem("user");
+      let parsed = {};
+      if (stored) {
+        try {
+          parsed = JSON.parse(stored);
+        } catch {
+          parsed = {};
+        }
       }
-    };
-    handleCheckUser();
-  }, []);
+      // Pull role out separately
+      const role = localStorage.getItem("role") || parsed.role;
+      setUser({ fullName: parsed.fullName, role });
+    } else {
+      setUser(null);
+    }
+  }, [navigate]);
 
   const handleLogout = () => {
     toast.success("Logged out successfully!");
     localStorage.removeItem("token");
     localStorage.removeItem("user");
+    localStorage.removeItem("role");
     setUser(null);
     navigate("/signin");
   };
 
+  // If not signed in, render nothing
   if (!user) return null;
 
   const roleLinks =
     user.role === "admin"
-      ? [
-          //   { to: "/admin", label: "Dashboard" }
-        ]
+      ? [{ to: "/Admin", label: "Admin Panel" }]
       : user.role === "teacher"
       ? [{ to: "/teacher", label: "Home" }]
       : user.role === "student"
