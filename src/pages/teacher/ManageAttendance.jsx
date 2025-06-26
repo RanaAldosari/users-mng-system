@@ -8,8 +8,8 @@ export default function ManageAttendance() {
   const navigate = useNavigate();
 
   const [classes, setClasses] = useState([]);
-  const [users, setUsers] = useState([]);       
-  const [students, setStudents] = useState([]); 
+  const [users, setUsers] = useState([]);
+  const [students, setStudents] = useState([]);
   const [attendance, setAttendance] = useState([]);
   const [loading, setLoading] = useState(false);
   const [selectedDate, setSelectedDate] = useState(null);
@@ -17,7 +17,6 @@ export default function ManageAttendance() {
   const [editedTime, setEditedTime] = useState("");
 
   const baseURL = "https://student-management-system-pnb9.onrender.com";
-
   const token = localStorage.getItem("token") || "";
 
   const axiosConfig = {
@@ -64,19 +63,9 @@ export default function ManageAttendance() {
   };
 
   const getAttendanceDates = () =>
-    Array.from(
-      new Set(attendance.map((rec) => new Date(rec.attendedAt).toDateString()))
-    );
+    Array.from(new Set(attendance.map((rec) => new Date(rec.attendedAt).toDateString())));
 
   const attendanceDates = getAttendanceDates();
-
-  const attendanceForSelectedDate = selectedDate
-    ? attendance.filter(
-        (rec) =>
-          new Date(rec.attendedAt).toDateString() ===
-          new Date(selectedDate).toDateString()
-      )
-    : [];
 
   const getNextAttendanceId = () => {
     if (attendance.length === 0) return 1;
@@ -87,6 +76,14 @@ export default function ManageAttendance() {
     return maxId + 1;
   };
 
+  const getAttendanceForStudent = (studentId) => {
+    return attendance.find(
+      (rec) =>
+        String(rec.attendeeId) === String(studentId) &&
+        new Date(rec.attendedAt).toDateString() === new Date(selectedDate).toDateString()
+    );
+  };
+
   if (loading) return <p className="p-6 text-center">Loading...</p>;
 
   return (
@@ -95,7 +92,6 @@ export default function ManageAttendance() {
         <button
           onClick={() => navigate("/teacher")}
           className="absolute top-0 left-0 bg-indigo-600 hover:bg-indigo-800 text-white rounded px-3 py-1 shadow-sm flex items-center space-x-1 transition"
-          aria-label="Back to Home"
         >
           <AiOutlineArrowLeft className="w-5 h-5" />
           <span>Home</span>
@@ -141,9 +137,8 @@ export default function ManageAttendance() {
           </select>
         </div>
         <button
-          onClick={() => navigate(`/add-attendance/${classId}/${getNextAttendanceId()}`)}
+          onClick={() => navigate(`/attendance/add/${classId}/${getNextAttendanceId()}`)}
           className="bg-indigo-700 hover:bg-indigo-900 text-white rounded px-4 h-10 flex items-center justify-center shadow"
-          aria-label="Add New Attendance"
         >
           <AiOutlinePlus className="h-6 w-6" />
         </button>
@@ -155,9 +150,9 @@ export default function ManageAttendance() {
             Attendance Records for {selectedDate}
           </h2>
 
-          {attendanceForSelectedDate.length === 0 ? (
+          {students.length === 0 ? (
             <p className="text-center text-gray-500 py-10 text-lg">
-              No attendance records found for this day.
+              No students registered in this class.
             </p>
           ) : (
             <table className="min-w-full border-collapse border border-gray-300">
@@ -170,10 +165,7 @@ export default function ManageAttendance() {
               </thead>
               <tbody>
                 {students.map((student) => {
-                  const attendanceRecord = attendanceForSelectedDate.find(
-                    (rec) => String(rec.attendeeId) === String(student.id)
-                  );
-
+                  const attendanceRecord = getAttendanceForStudent(student.id);
                   const status = attendanceRecord ? attendanceRecord.status : "absent";
 
                   return (
@@ -209,7 +201,7 @@ export default function ManageAttendance() {
                                   classId,
                                   attendeeId: student.id,
                                   status: editedTime,
-                                  attendedAt: new Date().toISOString(),
+                                  attendedAt: new Date(selectedDate).toISOString(),
                                 };
 
                                 try {
