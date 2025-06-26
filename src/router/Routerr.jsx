@@ -29,7 +29,7 @@ function AdminLayout() {
       {/* Sidebar */}
       <div className="w-60 bg-white shadow-md rounded-r-lg p-6 flex flex-col space-y-4">
         <h2 className="text-xl font-bold border-b-2 border-indigo-600 pb-2">Admin Panel</h2>
-        
+
         <Link to="/Admindashboard" className="text-indigo-700 hover:text-indigo-900 font-medium transition">
           Dashboard
         </Link>
@@ -62,7 +62,7 @@ const router = createBrowserRouter([
   {
     path: "/",
     element: <Layout />,
-    children:[
+    children: [
       { path: "/", element: <SignInComponent /> },
       // { path: "/SignIn", element: <SignInComponent /> },
       { path: "/Princple", element: <PrincpleComponent /> },
@@ -71,11 +71,25 @@ const router = createBrowserRouter([
         path: "/Admin",
         element: <AdminLayout />,
         children: [
-          { path: "", element: <AdminComponent /> }, 
-          { path: "Viewusers", element: <ViewUsersComponent /> }, 
+          { path: "", element: <AdminComponent /> },
+          { path: "Viewusers", element: <ViewUsersComponent /> },
           { path: "viewclass", element: <ViewClassComponent /> },
-          { path: "leaves-action", element: <LeavesPage /> }, 
-          { path: "AdminCreateClass", element: <AdminPageClass /> }, 
+          { path: "leaves-action", element: <LeavesPage /> },
+          { path: "AdminCreateClass", element: <AdminPageClass /> },
+
+
+          // teacher
+          { path: "classes/:classId/attendance/teacher", element: <ManageAttendance /> },
+          { path: "teacher", element: <TeacherHome /> },
+          { path: "classes/:classId/teacher", element: <ClassDetails /> },
+          { path: "add-attendance/:classId/:attendanceId", element: <AddAttendance /> },
+
+          // student
+          { path: "student", element: <StudentHome /> },
+          { path: "classes/:classId/student", element: <StClassDetails /> },
+          { path: "classes/:classId/attendance/student", element: <ViewAttendance /> },
+          { path: "leaves", element: <ViewLeaves /> },
+          { path: "classes/:classId/leaves/new", element: <CreateLeave /> },
         ]
       },
     ]
