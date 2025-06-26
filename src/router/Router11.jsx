@@ -1,5 +1,5 @@
 import React from "react";
-import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
+import { createBrowserRouter, RouterProvider, Outlet } from "react-router";
 import ManageAttendance from "../pages/teacher/ManageAttendance";
 import TeacherHome from "../pages/teacher/TeacherHome";
 import ClassDetails from "../pages/teacher/ClassDetails";
@@ -15,40 +15,39 @@ import HomeScreen from "../pages/HomeScreen";
 import TestSignin from "../pages/TestSignin";
 
 function Layout() {
-    return (
-        <>
-            <Navbar />
-            <Outlet />
-            <Footer />
-        </>
-    );
+  return (
+    <>
+      <Navbar />
+      <Outlet />
+      <Footer />
+    </>
+  );
 }
 
 const router = createBrowserRouter([
+  { path: "/", element: <HomeScreen /> },
+  { path: "/login", element: <TestSignin /> },
 
-    { path: "/", element: <HomeScreen /> },
-    { path: "/signin", element: < TestSignin/> },
+  {
+    path: "/",
+    element: <Layout />,
+    children: [
+      // teacher routes
+      { path: "attendance", element: <ManageAttendance /> },
+      { path: "teacher", element: <TeacherHome /> },
+      { path: "class", element: <ClassDetails /> },
+      { path: "attendance", element: <AddAttendance /> },
 
-    {
-        path: "/",
-        element: <Layout />,
-        children: [
-            // teacher
-            { path: "classes/:classId/attendance/teacher", element: <ManageAttendance /> },
-            { path: "teacher", element: <TeacherHome /> },
-            { path: "classes/:classId/teacher", element: <ClassDetails /> },
-            { path: "add-attendance/:classId/:attendanceId", element: <AddAttendance /> },
-            
-            // student
-            { path: "student", element: <StudentHome /> },
-            { path: "classes/:classId/student", element: <StClassDetails /> },
-            { path: "classes/:classId/attendance/student", element: <ViewAttendance /> },
-            { path: "leaves", element: <ViewLeaves /> },
-            { path: "classes/:classId/leaves/new", element: <CreateLeave /> },
-        ],
-    },
+      // student routes
+      { path: "student", element: <StudentHome /> },
+      { path: "student/class", element: <StClassDetails /> },
+      { path: "student/class/:id/attendance", element: <ViewAttendance /> },
+      { path: "student/leaves", element: <ViewLeaves /> },
+      { path: "student/class/:id/leaves/new", element: <CreateLeave /> },
+    ],
+  },
 ]);
 
 export default function Router11() {
-    return <RouterProvider router={router} />;
+  return <RouterProvider router={router} />;
 }

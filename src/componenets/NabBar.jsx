@@ -1,8 +1,8 @@
 import React, { useState, useEffect } from "react";
-import { Link, useNavigate, useLocation } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router";
 import { FaBars, FaTimes } from "react-icons/fa";
-import { toast, ToastContainer } from "react-toastify";
-import "react-toastify/dist/ReactToastify.css";
+// import { toast, ToastContainer } from "react-toastify";
+// import "react-toastify/dist/ReactToastify.css";
 
 export default function Navbar() {
     const [user, setUser] = useState(null);
@@ -24,7 +24,7 @@ export default function Navbar() {
     }, []);
 
     const handleLogout = () => {
-        toast.success("Logged out successfully!");
+        // toast.success("Logged out successfully!");
         localStorage.removeItem("token");
         localStorage.removeItem("user");
         setUser(null);
@@ -104,7 +104,7 @@ export default function Navbar() {
             {/* Mobile Menu */}
             {mobileMenuOpen && (
                 <div className="lg:hidden bg-indigo-800 text-white p-4 space-y-2">
-                    {roleLinks.map((link) => (
+{roleLinks.map((link) => (
                         <Link
                             key={link.to}
                             to={link.to}

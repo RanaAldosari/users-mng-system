@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, Navigate } from "react-router-dom";
+import { Link, Navigate } from "react-router";
 import axios from "axios";
 import { AiOutlineUsergroupAdd, AiOutlineUnorderedList } from "react-icons/ai";
 
@@ -10,7 +10,7 @@ export default function TeacherHome() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   if (user.role !== "teacher") {
-    return <Navigate to="/signin" replace />;
+    return <Navigate to="/login" replace />;
   }
 
   const [stats, setStats] = useState({ totalClasses: 0 });
@@ -25,10 +25,7 @@ export default function TeacherHome() {
         });
         const allClasses = classesRes.data;
 
-        setStats({
-          totalClasses: allClasses.length,
-        });
-
+        setStats({ totalClasses: allClasses.length });
         setClasses(allClasses);
       } catch (error) {
         console.error("Error fetching data:", error);
@@ -74,7 +71,7 @@ export default function TeacherHome() {
               >
                 <h3 className="text-xl font-bold mb-3">{cls.name}</h3>
                 <Link
-                  to={`/classes/${cls.id}/teacher`}
+                  to={`/class/${cls.id}`}
                   className="inline-flex items-center px-4 py-2 bg-indigo-700 hover:bg-indigo-900 text-white rounded shadow-sm transition"
                 >
                   <AiOutlineUnorderedList className="mr-2 text-white text-lg" />
@@ -82,7 +79,7 @@ export default function TeacherHome() {
                 </Link>
 
                 <Link
-                  to={`/classes/${cls.id}/attendance/teacher`}
+                  to={`/attendance/add/${cls.id}/new`}
                   className="ml-4 inline-flex items-center px-4 py-2 bg-white border-2 border-indigo-700 text-indigo-700 rounded shadow-sm transition hover:bg-indigo-50"
                 >
                   <AiOutlineUsergroupAdd className="mr-2 text-indigo-700 text-lg" />

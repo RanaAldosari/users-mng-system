@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineArrowLeft } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 const leaveUrl = "https://student-management-system-pnb9.onrender.com/leaves";
 

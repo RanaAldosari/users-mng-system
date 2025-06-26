@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import axios from "axios";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import Swal from "sweetalert2";
