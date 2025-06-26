@@ -41,9 +41,14 @@ export default function ManageAttendance() {
 
       setClasses(classesRes.data || []);
       setStudents(studentsRes.data.filter((u) => u.role === "student") || []);
-      setParticipants(
-        participantsRes.data.filter((p) => String(p.classId) === String(classId))
+      const studentParticipants = participantsRes.data.filter(
+        (p) =>
+          String(p.classId) === String(classId) &&
+          studentsRes.data.some((u) => u.id === p.userId && u.role === "student")
       );
+
+      setParticipants(studentParticipants);
+
       setAttendance(
         attendanceRes.data.filter((att) => String(att.classId) === String(classId))
       );
@@ -61,14 +66,6 @@ export default function ManageAttendance() {
 
   const getStudentById = (userId) => students.find((s) => String(s.id) === String(userId));
 
-  const formatDateTime = (dateString) => {
-    const date = new Date(dateString);
-    return date.toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-    });
-  };
 
   const getAttendanceDates = () =>
     Array.from(new Set(attendance.map((rec) => new Date(rec.attendedAt).toDateString())));
@@ -87,44 +84,6 @@ export default function ManageAttendance() {
       return idNum > max ? idNum : max;
     }, 0);
     return maxId + 1;
-  };
-
-  const saveEditedTime = async (record) => {
-    if (!editedTime) {
-      alert("Please enter a valid time (HH:mm).");
-      return;
-    }
-    try {
-      const originalDate = new Date(record.attendedAt);
-      const [hours, minutes] = editedTime.split(":").map(Number);
-      originalDate.setHours(hours, minutes);
-      await axios.put(`${attendanceUrl}/${record.id}`, {
-        ...record,
-        attendedAt: originalDate.toISOString(),
-      });
-      setEditingId(null);
-      setEditedTime("");
-      fetchAllData();
-    } catch (error) {
-      console.error("Failed to update attendance time:", error);
-      alert("Failed to update attendance time");
-    }
-  };
-
-  const handleDelete = async (id) => {
-    if (!window.confirm("Are you sure you want to delete this attendance record?")) return;
-    try {
-      await axios.delete(`${attendanceUrl}/${id}`);
-      fetchAllData();
-    } catch (error) {
-      console.error("Failed to delete attendance:", error);
-      alert("Failed to delete attendance");
-    }
-  };
-
-  const startEdit = (record) => {
-    setEditingId(record.id);
-    setEditedTime(formatDateTime(record.attendedAt));
   };
 
   if (loading) return <p className="p-6 text-center">Loading...</p>;
@@ -158,37 +117,37 @@ export default function ManageAttendance() {
       </section>
 
       {/* choose date and add new*/}
-      {attendanceDates.length > 0 && (
-        <section className="flex flex-col md:flex-row md:items-center justify-between bg-white p-5 rounded-lg shadow mb-10 max-w-5/12">
-          <div className="mb-4 md:mb-0 flex items-center space-x-4">
-            <label htmlFor="attendanceDate" className="font-semibold text-lg">
-              Select Attendance Date:
-            </label>
-            <select
-              id="attendanceDate"
-              className="border border-gray-300 rounded px-4 py-2 text-indigo-900"
-              value={selectedDate || ""}
-              onChange={(e) => setSelectedDate(e.target.value)}
-            >
-              <option value="" disabled>
-                -- Choose a date --
-              </option>
-              {attendanceDates.map((dateStr) => (
-                <option key={dateStr} value={dateStr}>
-                  {dateStr}
-                </option>
-              ))}
-            </select>
-          </div>
-          <button
-            onClick={() => navigate(`/add-attendance/${classId}/${getNextAttendanceId()}`)}
-            className="bg-indigo-700 hover:bg-indigo-900 text-white rounded px-4 h-10 flex items-center justify-center shadow"
-            aria-label="Add New Attendance"
+      <section className="flex flex-col md:flex-row md:items-center justify-between bg-white p-5 rounded-lg shadow mb-10 max-w-6/12">
+        <div className="mb-4 md:mb-0 flex flex-col md:flex-row items-center space-x-4">
+          <label htmlFor="attendanceDate" className="font-semibold text-lg">
+            Select Attendance Date:
+          </label>
+          <select
+            id="attendanceDate"
+            className="border border-gray-300 rounded px-4 py-2 text-indigo-900"
+            value={selectedDate || ""}
+            onChange={(e) => setSelectedDate(e.target.value)}
+            disabled={attendanceDates.length === 0} // if no date disable select
           >
-            <AiOutlinePlus className="h-6 w-6" />
-          </button>
-        </section>
-      )}
+            <option value="" disabled>
+              {attendanceDates.length === 0 ? "No attendance dates available" : "-- Choose a date --"}
+            </option>
+            {attendanceDates.map((dateStr) => (
+              <option key={dateStr} value={dateStr}>
+                {dateStr}
+              </option>
+            ))}
+          </select>
+        </div>
+        <button
+          onClick={() => navigate(`/add-attendance/${classId}/${getNextAttendanceId()}`)}
+          className="bg-indigo-700 hover:bg-indigo-900 text-white rounded px-4 h-10 flex items-center justify-center shadow"
+          aria-label="Add New Attendance"
+        >
+          <AiOutlinePlus className="h-6 w-6" />
+        </button>
+      </section>
+
 
       {/* attecndance table */}
       {selectedDate && (
@@ -211,65 +170,96 @@ export default function ManageAttendance() {
                 </tr>
               </thead>
               <tbody>
-                {attendanceForSelectedDate.map((record) => {
-                  const student = getStudentById(record.attendeeId);
+                {participants.map((participant) => {
+                  const student = getStudentById(participant.userId);
+                  const attendanceRecord = attendance.find(
+                    (rec) =>
+                      rec.attendeeId === participant.userId &&
+                      new Date(rec.attendedAt).toDateString() === selectedDate
+                  );
+
+                  const status = attendanceRecord ? attendanceRecord.status : "absent";
+
                   return (
                     <tr
-                      key={record.id}
+                      key={participant.id}
                       className="hover:bg-indigo-50 transition-colors duration-200"
                     >
                       <td className="py-3 px-6 border border-gray-300">
                         {student ? student.name : "Unknown Student"}
                       </td>
                       <td className="py-3 px-6 border border-gray-300">
-                        {editingId === record.id ? (
-                          <div className="flex items-center space-x-2">
-                            <input
-                              type="time"
-                              className="border rounded px-3 py-1 text-indigo-900"
-                              value={editedTime}
-                              onChange={(e) => setEditedTime(e.target.value)}
-                              style={{ backgroundColor: "transparent", appearance: "none" }}
-                            />
+                        {editingId === participant.userId ? (
+                          <select
+                            value={editedTime}
+                            onChange={(e) => setEditedTime(e.target.value)}
+                            className="border rounded px-3 py-1 text-indigo-900"
+                          >
+                            <option value="present">Present</option>
+                            <option value="absent">Absent</option>
+                            <option value="late">Late</option>
+                            <option value="excused">Excused</option>
+                          </select>
+                        ) : (
+                          <span className="text-gray-700">{status}</span>
+                        )}
+                      </td>
+                      <td className="py-3 px-6 border border-gray-300 text-center">
+                        {editingId === participant.userId ? (
+                          <div className=" flex flex-col md:flex-row items-center justify-center gap-2">
                             <button
-                              onClick={() => saveEditedTime(record)}
-                              className="bg-green-600 hover:bg-green-700 text-white rounded px-3 py-1"
+                              onClick={async () => {
+                                const newRecord = {
+                                  classId,
+                                  attendeeId: participant.userId,
+                                  status: editedTime,
+                                  attendedAt: new Date().toISOString(),
+                                };
+
+                                try {
+                                  if (attendanceRecord) {
+                                    await axios.put(
+                                      `${attendanceUrl}/${attendanceRecord.id}`,
+                                      newRecord
+                                    );
+                                  } else {
+                                    await axios.post(attendanceUrl, newRecord);
+                                  }
+                                  setEditingId(null);
+                                  fetchAllData();
+                                } catch (error) {
+                                  console.error("Error updating attendance:", error);
+                                  alert("Failed to save attendance record.");
+                                }
+                              }}
+                              className="border border-green-600 text-green-600 hover:text-green-700  rounded px-3 py-1 w-16"
                             >
                               Save
                             </button>
                             <button
                               onClick={() => setEditingId(null)}
-                              className="bg-gray-400 hover:bg-gray-500 text-white rounded px-3 py-1"
+                              className="text-gray-400 border border-gray-400 hover:text-gray-500 rounded px-3 py-1 w-16"
                             >
                               Cancel
                             </button>
                           </div>
                         ) : (
-                          formatDateTime(record.attendedAt)
-                        )}
-                      </td>
-                      <td className="py-3 px-6 border border-gray-300 text-center space-x-2">
-                        {editingId !== record.id && (
-                          <>
-                            <button
-                              onClick={() => startEdit(record)}
-                              className="border-1 border-indigo-700 text-indigo-700 bg-white rounded px-3 py-1 hover:bg-indigo-50 transition"
-                            >
-                              Edit
-                            </button>
-                            <button
-                              onClick={() => handleDelete(record.id)}
-                              className="bg-red-600 hover:bg-red-700 text-white rounded px-3 py-1"
-                            >
-                              Delete
-                            </button>
-                          </>
+                          <button
+                            onClick={() => {
+                              setEditingId(participant.userId);
+                              setEditedTime(status);
+                            }}
+                            className="text-indigo-800 cursor-pointer border border-indigo-800 rounded px-3 py-1 w-34"
+                          >
+                            Edit
+                          </button>
                         )}
                       </td>
                     </tr>
                   );
                 })}
               </tbody>
+
             </table>
           )}
         </section>
