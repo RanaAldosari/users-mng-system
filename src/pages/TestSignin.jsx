@@ -1,22 +1,25 @@
-import axios from 'axios';
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router';
+import axios from "axios";
+import React, { useState } from "react";
+import { useNavigate } from "react-router";
 
 function TestSignin() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
   const navigate = useNavigate();
 
   async function handleSignIn() {
     try {
-      const response = await axios.post('https://student-management-system-pnb9.onrender.com/auth/signin', {
-        email,
-        password,
-      });
+      const response = await axios.post(
+        "https://student-management-system-pnb9.onrender.com/auth/signin",
+        {
+          email,
+          password,
+        }
+      );
 
       const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      localStorage.setItem('user', JSON.stringify(user));
+      localStorage.setItem("token", token);
+      localStorage.setItem("user", JSON.stringify(user));
 
       if (user.role === "admin") {
         alert("Login successful as Admin");

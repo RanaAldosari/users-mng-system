@@ -5,7 +5,7 @@ import {
   RouterProvider,
   Outlet,
   Navigate,
-} from "react-router-dom";
+} from "react-router";
 
 // Layouts
 import Navbar from "../componenets/NabBar";
