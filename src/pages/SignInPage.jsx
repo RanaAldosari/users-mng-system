@@ -34,18 +34,18 @@ function SignInPage() {
       // Teacher
       if (email.startsWith("teacher") && email.endsWith("@gmail.com") && password === "password123") {
         alert("Login successful as Teacher");
-        navigate("/teacher");
+        // navigate("/teacher");
         return;
       }
 
       // Student
       if (email.startsWith("student") && email.endsWith("@gmail.com") && password === "password123") {
         alert("Login successful as Student");
-        navigate("/student");
+        // navigate("/student");
         return;
       }
 
-      alert("Login successful but role unknown. Please check user role.");
+      alert("Login successful");
     } catch (error) {
       console.error("Login failed:", error);
       alert("Login failed. Please check your email and password.");

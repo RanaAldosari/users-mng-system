@@ -22,11 +22,10 @@ function Layout() {
   );
 }
 
-
 function AdminLayout() {
   return (
     <div className="flex min-h-screen bg-neutral-50 text-indigo-900">
-      {/* Sidebar */}
+{/* side bar */}
       <div className="w-60 bg-white shadow-md rounded-r-lg p-6 flex flex-col space-y-4">
         <h2 className="text-xl font-bold border-b-2 border-indigo-600 pb-2">Admin Panel</h2>
         
@@ -49,8 +48,7 @@ function AdminLayout() {
           View Leaves
         </Link>
       </div>
-
-      {/* Main content */}
+{/* content */}
       <div className="flex-1 p-8 overflow-y-auto">
         <Outlet />
       </div>

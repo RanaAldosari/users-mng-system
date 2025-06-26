@@ -40,8 +40,7 @@ function AdminPage() {
         <h1 className="text-3xl font-extrabold text-center border-b-4 border-indigo-600 pb-3">
           Add Users
         </h1>
-
-        {/* Add Teacher */}
+{/* add teacher */}
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-xl font-bold">Add Teacher</h2>
           <div className="flex gap-4">
@@ -50,7 +49,7 @@ function AdminPage() {
               value={addTeacher}
               onChange={e => setAddTeacher(e.target.value)}
               className="flex-1 border border-gray-300 rounded px-4 py-2"
-              placeholder="Enter teacher name"
+              placeholder="Enter teacher name ,@gmail"
             />
             <button
               onClick={() => createUser(addTeacher, 'teacher')}
@@ -60,8 +59,7 @@ function AdminPage() {
             </button>
           </div>
         </div>
-
-        {/* Add Principal */}
+{/* add princple */}
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-xl font-bold">Add Principal</h2>
           <div className="flex gap-4">
@@ -70,7 +68,7 @@ function AdminPage() {
               value={addPrincipal}
               onChange={e => setAddPrincipal(e.target.value)}
               className="flex-1 border border-gray-300 rounded px-4 py-2"
-              placeholder="Enter principal name"
+              placeholder="Enter principal name,@gmail"
             />
             <button
               onClick={() => createUser(addPrincipal, 'principal')}
@@ -80,8 +78,7 @@ function AdminPage() {
             </button>
           </div>
         </div>
-
-        {/* Add Student */}
+{/* add std */}
         <div className="bg-white rounded-lg shadow p-6 space-y-4">
           <h2 className="text-xl font-bold">Add Student</h2>
           <div className="flex gap-4">
@@ -90,7 +87,7 @@ function AdminPage() {
               value={addStudent}
               onChange={e => setAddStudent(e.target.value)}
               className="flex-1 border border-gray-300 rounded px-4 py-2"
-              placeholder="Enter student name"
+              placeholder="Enter student name ,@gmail"
             />
             <button
               onClick={() => createUser(addStudent, 'student')}

@@ -1,99 +1,101 @@
-import axios from 'axios'
-import React, { useEffect, useState } from 'react'
+import axios from 'axios';
+import React, { useEffect, useState } from 'react';
 
 function ViewUsersPage() {
-  const [users, setUsers] = useState([])
+  const [users, setUsers] = useState([]);
+  const [selectedRole, setSelectedRole] = useState('all');
 
   useEffect(() => {
-    const token = localStorage.getItem("token")
-    // get all users
+    const token = localStorage.getItem("token");
     axios.get("https://student-management-system-pnb9.onrender.com/users", {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     })
       .then(res => {
-        console.log("Users fetched:", res.data)
-        setUsers(res.data)
+        setUsers(res.data);
       })
       .catch(err => {
-        console.log("Error fetching users:", err)
-      })
-  }, [])
+        console.log("Error fetching users:", err);
+      });
+  }, []);
 // delete user by id
   const deleteUser = (id) => {
-    const token = localStorage.getItem("token")
-    const url = `https://student-management-system-pnb9.onrender.com/users/${id}`
-
-    axios.delete(url, {
+    const token = localStorage.getItem("token");
+    axios.delete(`https://student-management-system-pnb9.onrender.com/users/${id}`, {
       headers: {
         Authorization: `Bearer ${token}`,
       },
     }).then(() => {
-      alert("Deleted")
-      setUsers(userDel =>
- userDel.filter(user => user.id !== id))
+      alert("User deleted successfully.");
+      setUsers(prev => prev.filter(user => user.id !== id));
     }).catch(err => {
-      console.error("Failed to delete user:", err)
-      alert("Failed to delete user")
-    })
-  }
+      console.error("Failed to delete user:", err);
+      alert("Failed to delete user");
+    });
+  };
 
-  const teachers = users.filter(teacherid => teacherid.role === 'teacher').slice(0, 2)
-  const principals = users.filter(princpleid => princpleid.role === 'principal').slice(0, 1)
-  // const students = users.filter(u => u.role === 'student').slice(0, 20).sort((a,b)=>)
-const extractNumber = (email) => {
-  const match = email.match(/\d+/);
-  return match ? Number(match[0]) : 0;
-};
-const students = users
-  .filter(stdid => stdid.role === 'student')
-  .sort((a, b) => extractNumber(a.email) - extractNumber(b.email))
-  .slice(0, 20);
+  const extractNumber = (email) => {
+    const match = email.match(/\d+/);
+    return match ? Number(match[0]) : 0;
+  };
 
+const filteredUsers = users
+  .filter(user => selectedRole === 'all' || user.role === selectedRole)
+  .sort((a, b) => {
+    if (selectedRole === 'student') {
+      return extractNumber(a.email) - extractNumber(b.email);
+    }
+    return 0;
+  })
+  .slice(
+    0,
+    selectedRole === 'teacher' ? 2 : selectedRole === 'principal' ? 1 : users.length
+  );
 
   return (
     <>
-  
-    <div className='p-4 space-y-4'>
-      <h1 className='text-xl font-bold'>Users Management</h1>
-
-      <div>
-        <h2 className='font-semibold text-lg'>Teachers:</h2>
-        {teachers.length === 0 && <p>No teachers found.</p>}
-        {teachers.map(user => (
-          <div key={user.id} className='flex gap-4 items-center'>
-            <p>{user.name || user.email || "No name"}</p>
-            <button onClick={() => deleteUser(user.id)} className='bg-red-400 text-white px-2'>Delete</button>
+    <div className="p-6 max-w-3xl mx-auto space-y-6">
+      <h1 className="text-2xl font-bold">User Management</h1>
+{/* filter based on role type */}
+      <div className="mb-4">
+        <label className="font-medium mr-2">Filter by Role:</label>
+        <select
+          value={selectedRole}
+          onChange={(e) => setSelectedRole(e.target.value)}
+          className="border p-2 rounded"
+        >
+          <option value="all">All</option>
+          <option value="teacher">Teachers</option>
+          <option value="student">Students</option>
+          <option value="principal">Principals</option>
+        </select>
+      </div>
+{/*  */}
+      {filteredUsers.length === 0 ? (
+        <p className="text-gray-500">No users found for selected role.</p>
+      ) : (
+        filteredUsers.map((user) => (
+          <div
+            key={user.id}
+            className="flex justify-between items-center p-3 border rounded bg-white shadow-sm"
+          >
+            <div>
+              <p><strong>Email:</strong> {user.email}</p>
+              <p><strong>Role:</strong> {user.role}</p>
+            </div>
+            <button
+              onClick={() => deleteUser(user.id)}
+              className="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600"
+            >
+              Delete
+            </button>
           </div>
-        ))}
-      </div>
-
-      <div>
-        <h2 className='font-semibold text-lg'>Principals:</h2>
-        {principals.length === 0 && <p>No principals found.</p>}
-        {principals.map(user => (
-          <div key={user.id} className='flex gap-4 items-center'>
-            <p>{user.name || user.email || "No name"}</p>
-            <button onClick={() => deleteUser(user.id)} className='bg-red-400 text-white px-2'>Delete</button>
-          </div>
-        ))}
-      </div>
-
-      <div>
-        <h2 className='font-semibold text-lg'>Students:</h2>
-        {students.length === 0 && <p>No students found.</p>}
-      {students.map(student => (
-  <div key={student.id} className='flex gap-4 items-center'>
-    <p>{student.email}</p>
-    <button onClick={() => deleteUser(student.id)} className='bg-red-400 text-white px-2'>Delete</button>
-  </div>
-))}
-
-      </div>
+        ))
+      )}
     </div>
       </>
-  )
+  );
 }
 
-export default ViewUsersPage
+export default ViewUsersPage;
