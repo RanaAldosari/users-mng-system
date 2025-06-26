@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router";
 import axios from "axios";
 import { AiOutlineArrowLeft, AiOutlineFileText } from "react-icons/ai";
 
@@ -23,7 +23,10 @@ export default function ViewAttendance() {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
         if (!user.id) throw new Error("User not logged in");
 
-        const attendanceRes = await axios.get(`${baseURL}/attendances`, axiosConfig);
+        const attendanceRes = await axios.get(
+          `${baseURL}/attendances`,
+          axiosConfig
+        );
 
         const filteredAttendance = attendanceRes.data.filter(
           (record) =>
@@ -45,7 +48,9 @@ export default function ViewAttendance() {
 
   if (loading) {
     return (
-      <div className="p-6 text-center text-indigo-900 font-semibold">Loading...</div>
+      <div className="p-6 text-center text-indigo-900 font-semibold">
+        Loading...
+      </div>
     );
   }
 
@@ -89,8 +94,12 @@ export default function ViewAttendance() {
           <table className="w-full table-auto border-collapse border border-gray-300">
             <thead className="bg-indigo-700 text-white">
               <tr>
-                <th className="px-5 py-3 border border-gray-300 text-left">Date</th>
-                <th className="px-5 py-3 border border-gray-300 text-left">Status</th>
+                <th className="px-5 py-3 border border-gray-300 text-left">
+                  Date
+                </th>
+                <th className="px-5 py-3 border border-gray-300 text-left">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>

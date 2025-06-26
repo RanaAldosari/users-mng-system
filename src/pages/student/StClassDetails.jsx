@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router";
 import axios from "axios";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 
@@ -34,7 +34,9 @@ export default function StClassDetails() {
 
   if (loading) {
     return (
-      <div className="p-6 text-center text-indigo-900 font-semibold">Loading...</div>
+      <div className="p-6 text-center text-indigo-900 font-semibold">
+        Loading...
+      </div>
     );
   }
 
@@ -72,28 +74,36 @@ export default function StClassDetails() {
             <strong className="inline-block w-36">ID:</strong> {classDetails.id}
           </li>
           <li>
-            <strong className="inline-block w-36">Name:</strong> {classDetails.name}
+            <strong className="inline-block w-36">Name:</strong>{" "}
+            {classDetails.name}
           </li>
           <li>
-            <strong className="inline-block w-36">Description:</strong> {classDetails.description}
+            <strong className="inline-block w-36">Description:</strong>{" "}
+            {classDetails.description}
           </li>
           <li>
-            <strong className="inline-block w-36">Location:</strong> {classDetails.location}
+            <strong className="inline-block w-36">Location:</strong>{" "}
+            {classDetails.location}
           </li>
           <li>
-            <strong className="inline-block w-36">Capacity:</strong> {classDetails.capacity}
+            <strong className="inline-block w-36">Capacity:</strong>{" "}
+            {classDetails.capacity}
           </li>
           <li>
-            <strong className="inline-block w-36">Start Date:</strong> {classDetails.dateStartAt}
+            <strong className="inline-block w-36">Start Date:</strong>{" "}
+            {classDetails.dateStartAt}
           </li>
           <li>
-            <strong className="inline-block w-36">End Date:</strong> {classDetails.dateEndAt}
+            <strong className="inline-block w-36">End Date:</strong>{" "}
+            {classDetails.dateEndAt}
           </li>
           <li>
-            <strong className="inline-block w-36">Start Time:</strong> {classDetails.timeStartAt}
+            <strong className="inline-block w-36">Start Time:</strong>{" "}
+            {classDetails.timeStartAt}
           </li>
           <li>
-            <strong className="inline-block w-36">End Time:</strong> {classDetails.timeEndAt}
+            <strong className="inline-block w-36">End Time:</strong>{" "}
+            {classDetails.timeEndAt}
           </li>
         </ul>
       </div>

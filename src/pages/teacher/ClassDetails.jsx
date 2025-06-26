@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router";
 import axios from "axios";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 
@@ -8,7 +8,7 @@ export default function ClassDetails() {
   const navigate = useNavigate();
   const [classDetails, setClassDetails] = useState(null);
   const [students, setStudents] = useState([]);
-  const [users, setUsers] = useState([]); 
+  const [users, setUsers] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const baseURL = "https://student-management-system-pnb9.onrender.com";
@@ -20,10 +20,16 @@ export default function ClassDetails() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const classRes = await axios.get(`${baseURL}/classes/${classId}`, axiosConfig);
+        const classRes = await axios.get(
+          `${baseURL}/classes/${classId}`,
+          axiosConfig
+        );
         setClassDetails(classRes.data);
 
-        const studentsRes = await axios.get(`${baseURL}/classes/${classId}/students`, axiosConfig);
+        const studentsRes = await axios.get(
+          `${baseURL}/classes/${classId}/students`,
+          axiosConfig
+        );
         setStudents(studentsRes.data);
 
         const usersRes = await axios.get(`${baseURL}/users`, axiosConfig);
@@ -45,7 +51,9 @@ export default function ClassDetails() {
 
   if (loading) {
     return (
-      <div className="p-6 text-center text-indigo-900 font-semibold">Loading...</div>
+      <div className="p-6 text-center text-indigo-900 font-semibold">
+        Loading...
+      </div>
     );
   }
 
@@ -82,28 +90,36 @@ export default function ClassDetails() {
             <strong className="inline-block w-36">ID:</strong> {classDetails.id}
           </li>
           <li>
-            <strong className="inline-block w-36">Name:</strong> {classDetails.name}
+            <strong className="inline-block w-36">Name:</strong>{" "}
+            {classDetails.name}
           </li>
           <li>
-            <strong className="inline-block w-36">Description:</strong> {classDetails.description}
+            <strong className="inline-block w-36">Description:</strong>{" "}
+            {classDetails.description}
           </li>
           <li>
-            <strong className="inline-block w-36">Location:</strong> {classDetails.location}
+            <strong className="inline-block w-36">Location:</strong>{" "}
+            {classDetails.location}
           </li>
           <li>
-            <strong className="inline-block w-36">Capacity:</strong> {classDetails.capacity}
+            <strong className="inline-block w-36">Capacity:</strong>{" "}
+            {classDetails.capacity}
           </li>
           <li>
-            <strong className="inline-block w-36">Start Date:</strong> {classDetails.dateStartAt}
+            <strong className="inline-block w-36">Start Date:</strong>{" "}
+            {classDetails.dateStartAt}
           </li>
           <li>
-            <strong className="inline-block w-36">End Date:</strong> {classDetails.dateEndAt}
+            <strong className="inline-block w-36">End Date:</strong>{" "}
+            {classDetails.dateEndAt}
           </li>
           <li>
-            <strong className="inline-block w-36">Start Time:</strong> {classDetails.timeStartAt}
+            <strong className="inline-block w-36">Start Time:</strong>{" "}
+            {classDetails.timeStartAt}
           </li>
           <li>
-            <strong className="inline-block w-36">End Time:</strong> {classDetails.timeEndAt}
+            <strong className="inline-block w-36">End Time:</strong>{" "}
+            {classDetails.timeEndAt}
           </li>
         </ul>
       </div>
@@ -120,8 +136,12 @@ export default function ClassDetails() {
           <table className="w-full table-auto border-collapse border border-gray-300">
             <thead className="bg-indigo-700 text-white">
               <tr>
-                <th className="px-5 py-3 border border-gray-300 text-left">Name</th>
-                <th className="px-5 py-3 border border-gray-300 text-left">Email</th>
+                <th className="px-5 py-3 border border-gray-300 text-left">
+                  Name
+                </th>
+                <th className="px-5 py-3 border border-gray-300 text-left">
+                  Email
+                </th>
               </tr>
             </thead>
             <tbody>

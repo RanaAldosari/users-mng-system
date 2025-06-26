@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Link, Navigate, useNavigate } from "react-router-dom";
+import { Link, Navigate, useNavigate } from "react-router";
 import axios from "axios";
 import { AiOutlineFileText } from "react-icons/ai";
 
@@ -90,7 +90,9 @@ export default function StudentHome() {
 
   if (loading) {
     return (
-      <p className="p-6 text-center text-indigo-900 font-semibold">Loading...</p>
+      <p className="p-6 text-center text-indigo-900 font-semibold">
+        Loading...
+      </p>
     );
   }
 
@@ -104,19 +106,27 @@ export default function StudentHome() {
       <section className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8">
         <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
           <p className="text-sm text-gray-500 uppercase mb-1">Total Classes</p>
-          <p className="text-5xl font-extrabold text-indigo-700">{stats.totalClasses}</p>
+          <p className="text-5xl font-extrabold text-indigo-700">
+            {stats.totalClasses}
+          </p>
         </div>
         <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
           <p className="text-sm text-gray-500 uppercase mb-1">Present Days</p>
-          <p className="text-5xl font-extrabold text-green-500">{stats.presentDays}</p>
+          <p className="text-5xl font-extrabold text-green-500">
+            {stats.presentDays}
+          </p>
         </div>
         <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
           <p className="text-sm text-gray-500 uppercase mb-1">Absent Days</p>
-          <p className="text-5xl font-extrabold text-red-500">{stats.absentDays}</p>
+          <p className="text-5xl font-extrabold text-red-500">
+            {stats.absentDays}
+          </p>
         </div>
         <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
           <p className="text-sm text-gray-500 uppercase mb-1">Late Days</p>
-          <p className="text-5xl font-extrabold text-yellow-500">{stats.lateDays}</p>
+          <p className="text-5xl font-extrabold text-yellow-500">
+            {stats.lateDays}
+          </p>
         </div>
       </section>
 

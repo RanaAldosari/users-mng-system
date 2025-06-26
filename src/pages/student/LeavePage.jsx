@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import axios from "axios";
 import { AiOutlineArrowLeft } from "react-icons/ai";
-import { useNavigate } from "react-router-dom";
+import { useNavigate } from "react-router";
 
 const leaveUrl = "https://student-management-system-pnb9.onrender.com/leaves";
 
@@ -43,7 +43,9 @@ export default function LeavePage() {
 
   if (loading) {
     return (
-      <div className="p-6 text-center text-indigo-900 font-semibold">Loading...</div>
+      <div className="p-6 text-center text-indigo-900 font-semibold">
+        Loading...
+      </div>
     );
   }
 
@@ -71,9 +73,15 @@ export default function LeavePage() {
         <table className="w-full table-auto border-collapse border border-gray-300 bg-white rounded-lg shadow">
           <thead className="bg-indigo-700 text-white">
             <tr>
-              <th className="px-5 py-3 border border-gray-300 text-left">Date</th>
-              <th className="px-5 py-3 border border-gray-300 text-left">Type</th>
-              <th className="px-5 py-3 border border-gray-300 text-left">Status</th>
+              <th className="px-5 py-3 border border-gray-300 text-left">
+                Date
+              </th>
+              <th className="px-5 py-3 border border-gray-300 text-left">
+                Type
+              </th>
+              <th className="px-5 py-3 border border-gray-300 text-left">
+                Status
+              </th>
             </tr>
           </thead>
           <tbody>
@@ -90,11 +98,15 @@ export default function LeavePage() {
                 </td>
                 <td className="px-5 py-3 border border-gray-300">
                   {leave.status === "accepted" ? (
-                    <span className="text-green-600 font-semibold">Accepted</span>
+                    <span className="text-green-600 font-semibold">
+                      Accepted
+                    </span>
                   ) : leave.status === "rejected" ? (
                     <span className="text-red-600 font-semibold">Rejected</span>
                   ) : (
-                    <span className="text-yellow-500 font-semibold">Pending</span>
+                    <span className="text-yellow-500 font-semibold">
+                      Pending
+                    </span>
                   )}
                 </td>
               </tr>

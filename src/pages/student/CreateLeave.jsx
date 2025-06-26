@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useNavigate, useParams } from "react-router-dom";
+import { useNavigate, useParams } from "react-router";
 import axios from "axios";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import Swal from "sweetalert2";
@@ -17,14 +17,17 @@ export default function CreateLeave() {
   const [loading, setLoading] = useState(false);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
-  const token = localStorage.getItem("token"); 
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
     const fetchAttendance = async () => {
       try {
-        const res = await axios.get(`${baseUrl}/classes/${classId}/attendance`, {
-          headers: { Authorization: `Bearer ${token}` },
-        });
+        const res = await axios.get(
+          `${baseUrl}/classes/${classId}/attendance`,
+          {
+            headers: { Authorization: `Bearer ${token}` },
+          }
+        );
 
         const attendanceData = res.data.filter(
           (record) =>
@@ -74,7 +77,11 @@ export default function CreateLeave() {
         headers: { Authorization: `Bearer ${token}` },
       });
 
-      Swal.fire("Success", "Leave request submitted successfully.", "success").then(() => {
+      Swal.fire(
+        "Success",
+        "Leave request submitted successfully.",
+        "success"
+      ).then(() => {
         navigate("/leaves");
       });
     } catch (error) {

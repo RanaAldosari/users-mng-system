@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { useParams, useNavigate } from "react-router-dom";
+import { useParams, useNavigate } from "react-router";
 import axios from "axios";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 
@@ -23,7 +23,10 @@ export default function AddAttendance() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        const classRes = await axios.get(`${baseURL}/classes/${classId}`, axiosConfig);
+        const classRes = await axios.get(
+          `${baseURL}/classes/${classId}`,
+          axiosConfig
+        );
         setClassName(classRes.data?.name || "Unknown Class");
 
         const studentsRes = await axios.get(
@@ -36,8 +39,12 @@ export default function AddAttendance() {
 
         const enrolledStudents = studentsRes.data
           .map((student) => {
-            const user = users.find((u) => String(u.id) === String(student.userId));
-            return user ? { ...student, name: user.name, email: user.email } : null;
+            const user = users.find(
+              (u) => String(u.id) === String(student.userId)
+            );
+            return user
+              ? { ...student, name: user.name, email: user.email }
+              : null;
           })
           .filter(Boolean);
 
@@ -123,18 +130,26 @@ export default function AddAttendance() {
           <table className="min-w-full border-collapse border border-gray-300 bg-white rounded-lg shadow overflow-hidden">
             <thead className="bg-indigo-700 text-white">
               <tr>
-                <th className="py-3 px-6 border border-gray-300 text-left">Student Name</th>
-                <th className="py-3 px-6 border border-gray-300 text-left">Status</th>
+                <th className="py-3 px-6 border border-gray-300 text-left">
+                  Student Name
+                </th>
+                <th className="py-3 px-6 border border-gray-300 text-left">
+                  Status
+                </th>
               </tr>
             </thead>
             <tbody>
               {students.map((stu) => (
                 <tr key={stu.userId} className="hover:bg-indigo-50">
-                  <td className="py-3 px-6 border border-gray-300">{stu.name || "No Name"}</td>
+                  <td className="py-3 px-6 border border-gray-300">
+                    {stu.name || "No Name"}
+                  </td>
                   <td className="py-3 px-6 border border-gray-300">
                     <select
                       value={attendanceData[stu.userId]}
-                      onChange={(e) => handleStatusChange(stu.userId, e.target.value)}
+                      onChange={(e) =>
+                        handleStatusChange(stu.userId, e.target.value)
+                      }
                       className="border border-gray-300 rounded px-3 py-1 text-indigo-900"
                     >
                       <option value="present">Present</option>
