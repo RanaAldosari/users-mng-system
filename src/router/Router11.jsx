@@ -2,7 +2,6 @@ import React from "react";
 import { createBrowserRouter, RouterProvider, Outlet } from "react-router-dom";
 import ManageAttendance from "../pages/teacher/ManageAttendance";
 import TeacherHome from "../pages/teacher/TeacherHome";
-import LoginPage from "../pages/LoginPage";
 import ClassDetails from "../pages/teacher/ClassDetails";
 import AddAttendance from "../pages/teacher/AddAttendance";
 import StudentHome from "../pages/student/StudentHome";
@@ -13,6 +12,7 @@ import CreateLeave from "../pages/student/CreateLeave";
 import Navbar from "../componenets/NabBar";
 import Footer from "../componenets/Footer";
 import HomeScreen from "../pages/HomeScreen";
+import TestSignin from "../pages/TestSignin";
 
 function Layout() {
     return (
@@ -27,7 +27,7 @@ function Layout() {
 const router = createBrowserRouter([
 
     { path: "/", element: <HomeScreen /> },
-    { path: "/login", element: <LoginPage /> },
+    { path: "/signin", element: < TestSignin/> },
 
     {
         path: "/",

@@ -9,7 +9,7 @@ export default function StudentHome() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   if (user.role !== "student") {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/signin" replace />;
   }
 
   const axiosConfig = {

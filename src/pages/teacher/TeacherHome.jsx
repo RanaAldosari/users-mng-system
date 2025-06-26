@@ -10,7 +10,7 @@ export default function TeacherHome() {
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   if (user.role !== "teacher") {
-    return <Navigate to="/login" replace />;
+    return <Navigate to="/signin" replace />;
   }
 
   const [stats, setStats] = useState({ totalClasses: 0 });
