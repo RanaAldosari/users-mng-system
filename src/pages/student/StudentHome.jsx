@@ -5,12 +5,16 @@ import { AiOutlineFileText } from "react-icons/ai";
 
 export default function StudentHome() {
   const navigate = useNavigate();
-  const token = localStorage.getItem("token");
+  const token = localStorage.getItem("token") || "";
   const user = JSON.parse(localStorage.getItem("user") || "{}");
 
   if (user.role !== "student") {
     return <Navigate to="/login" replace />;
   }
+
+  const axiosConfig = {
+    headers: { Authorization: `Bearer ${token}` },
+  };
 
   const [stats, setStats] = useState({
     totalClasses: 0,
@@ -24,26 +28,29 @@ export default function StudentHome() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // Fetch classes for the student
         const studentRes = await axios.get(
-          "https://685cc514769de2bf085dc721.mockapi.io/students"
+          "https://student-management-system-pnb9.onrender.com/students",
+          axiosConfig
         );
         const enrolledStudents = studentRes.data.filter(
-          (s) => String(s.studentId) === String(user.id)
+          (s) => String(s.userId) === String(user.id)
         );
 
+        // جلب الصفوف
         const classRes = await axios.get(
-          "https://6837ad992c55e01d184a8113.mockapi.io/Class"
+          "https://student-management-system-pnb9.onrender.com/classes",
+          axiosConfig
         );
         const enrolledClasses = classRes.data.filter((cls) =>
           enrolledStudents.some((s) => String(s.classId) === String(cls.id))
         );
 
         const attendanceRes = await axios.get(
-          "https://68219a21259dad2655afc28a.mockapi.io/Attendance"
+          "https://student-management-system-pnb9.onrender.com/attendances",
+          axiosConfig
         );
         const attendanceRecords = attendanceRes.data.filter(
-          (a) => String(a.attendeeId) === String(user.id)
+          (a) => String(a.userId) === String(user.id)
         );
 
         const presentDays = attendanceRecords.filter(

@@ -43,10 +43,12 @@ export default function Navbar() {
                 ? [
                     { to: "/teacher", label: "Home" },
                 ]
-                : [
-                    { to: "/student", label: "Home" },
-                    { to: "/leaves", label: "Manage Leaves" },
-                ];
+                : user.role === "student"
+                    ? [
+                        { to: "/student", label: "Home" },
+                        { to: "/leaves", label: "Manage Leaves" },
+                    ]
+                    : [];
 
     const isActive = (to) => location.pathname === to;
 
@@ -69,8 +71,8 @@ export default function Navbar() {
                             <Link
                                 to={link.to}
                                 className={`text-lg font-medium transition ${isActive(link.to)
-                                        ? "text-blue-300"
-                                        : "text-white hover:text-gray-300"
+                                    ? "text-blue-300"
+                                    : "text-white hover:text-gray-300"
                                     }`}
                             >
                                 {link.label}
@@ -108,8 +110,8 @@ export default function Navbar() {
                             to={link.to}
                             onClick={() => setMobileMenuOpen(false)}
                             className={`block py-2 px-4 rounded ${isActive(link.to)
-                                    ? "bg-blue-700"
-                                    : "hover:bg-gray-700 transition-colors"
+                                ? "bg-blue-700"
+                                : "hover:bg-gray-700 transition-colors"
                                 }`}
                         >
                             {link.label}

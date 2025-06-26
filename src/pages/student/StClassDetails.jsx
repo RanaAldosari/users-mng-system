@@ -9,11 +9,17 @@ export default function StClassDetails() {
   const [classDetails, setClassDetails] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  const token = localStorage.getItem("token") || "";
+  const axiosConfig = {
+    headers: { Authorization: `Bearer ${token}` },
+  };
+
   useEffect(() => {
     const fetchClassDetails = async () => {
       try {
         const classRes = await axios.get(
-          `https://6837ad992c55e01d184a8113.mockapi.io/Class/${classId}`
+          `https://student-management-system-pnb9.onrender.com/classes/${classId}`,
+          axiosConfig
         );
         setClassDetails(classRes.data);
       } catch (error) {

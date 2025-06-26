@@ -3,12 +3,17 @@ import axios from "axios";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import { useNavigate } from "react-router-dom";
 
-const leaveUrl = "https://68219a21259dad2655afc28a.mockapi.io/Leave";
+const leaveUrl = "https://student-management-system-pnb9.onrender.com/leaves";
 
 export default function LeavePage() {
   const navigate = useNavigate();
   const [leaves, setLeaves] = useState([]);
   const [loading, setLoading] = useState(true);
+
+  const token = localStorage.getItem("token") || "";
+  const axiosConfig = {
+    headers: { Authorization: `Bearer ${token}` },
+  };
 
   useEffect(() => {
     const fetchLeaves = async () => {
@@ -21,7 +26,7 @@ export default function LeavePage() {
           return;
         }
 
-        const res = await axios.get(leaveUrl);
+        const res = await axios.get(leaveUrl, axiosConfig);
         const userLeaves = res.data.filter(
           (leave) => String(leave.userId) === String(user.id)
         );

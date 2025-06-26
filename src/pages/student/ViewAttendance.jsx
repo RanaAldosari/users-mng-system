@@ -3,8 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AiOutlineArrowLeft, AiOutlineFileText } from "react-icons/ai";
 
-const attendanceUrl = "https://68219a21259dad2655afc28a.mockapi.io/Attendance";
-
 export default function ViewAttendance() {
   const { classId } = useParams();
   const navigate = useNavigate();
@@ -12,17 +10,27 @@ export default function ViewAttendance() {
   const [attendanceRecords, setAttendanceRecords] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const baseURL = "https://student-management-system-pnb9.onrender.com";
+  const token = localStorage.getItem("token") || "";
+  const axiosConfig = {
+    headers: { Authorization: `Bearer ${token}` },
+  };
+
   useEffect(() => {
     const fetchAttendance = async () => {
       setLoading(true);
       try {
         const user = JSON.parse(localStorage.getItem("user") || "{}");
-        const attendanceRes = await axios.get(attendanceUrl);
+        if (!user.id) throw new Error("User not logged in");
+
+        const attendanceRes = await axios.get(`${baseURL}/attendances`, axiosConfig);
+
         const filteredAttendance = attendanceRes.data.filter(
           (record) =>
             String(record.classId) === String(classId) &&
-            String(record.attendeeId) === String(user.id)
+            String(record.userId) === String(user.id)
         );
+
         setAttendanceRecords(filteredAttendance);
       } catch (error) {
         console.error("Failed to fetch attendance records:", error);

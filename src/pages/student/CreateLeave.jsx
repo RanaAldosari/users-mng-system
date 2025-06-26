@@ -4,8 +4,7 @@ import axios from "axios";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 import Swal from "sweetalert2";
 
-const attendanceUrl = "https://68219a21259dad2655afc28a.mockapi.io/Attendance";
-const leaveUrl = "https://68219a21259dad2655afc28a.mockapi.io/Leave";
+const baseUrl = "https://student-management-system-pnb9.onrender.com";
 
 export default function CreateLeave() {
   const { classId } = useParams();
@@ -18,35 +17,35 @@ export default function CreateLeave() {
   const [loading, setLoading] = useState(false);
 
   const user = JSON.parse(localStorage.getItem("user") || "{}");
+  const token = localStorage.getItem("token"); 
 
   useEffect(() => {
-    const fetchData = async () => {
+    const fetchAttendance = async () => {
       try {
-        const attendanceRes = await axios.get(attendanceUrl);
-        const attendanceData = attendanceRes.data.filter(
+        const res = await axios.get(`${baseUrl}/classes/${classId}/attendance`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+
+        const attendanceData = res.data.filter(
           (record) =>
-            String(record.classId) === String(classId) &&
-            String(record.attendeeId) === String(user.id) &&
-            record.status === "absent"
+            record.attendeeId === user.id && record.status === "absent"
         );
 
-        const filteredAbsentDates = attendanceData.map((att) =>
+        const dates = attendanceData.map((att) =>
           new Date(att.attendedAt).toISOString().slice(0, 10)
         );
 
-        setAbsentDates(filteredAbsentDates);
+        setAbsentDates(dates);
 
-        if (filteredAbsentDates.length > 0) {
-          setSelectedDate(filteredAbsentDates[0]);
-        }
+        if (dates.length > 0) setSelectedDate(dates[0]);
       } catch (error) {
-        console.error("Error fetching data:", error);
-        Swal.fire("Error", "Failed to load data for leave application.", "error");
+        console.error(error);
+        Swal.fire("Error", "Failed to load attendance data.", "error");
       }
     };
 
-    fetchData();
-  }, [classId, user.id]);
+    fetchAttendance();
+  }, [classId, user.id, token]);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -55,6 +54,7 @@ export default function CreateLeave() {
       Swal.fire("Error", "Please select a date for your leave.", "error");
       return;
     }
+
     if (!reason.trim()) {
       Swal.fire("Error", "Please provide a reason.", "error");
       return;
@@ -63,26 +63,22 @@ export default function CreateLeave() {
     setLoading(true);
 
     try {
-      const now = new Date().toISOString();
-
       const payload = {
-        classId: classId,
-        userId: user.id,
+        studentId: user.id,
+        leaveAt: selectedDate,
         leaveType,
         reason,
-        leaveAt: selectedDate,
-        status: "pending",
-        createdAt: now,
-        updatedAt: now,
       };
 
-      await axios.post(leaveUrl, payload);
+      await axios.post(`${baseUrl}/classes/${classId}/leaves`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
 
       Swal.fire("Success", "Leave request submitted successfully.", "success").then(() => {
         navigate("/leaves");
       });
     } catch (error) {
-      console.error("Failed to submit leave request:", error);
+      console.error(error);
       Swal.fire("Error", "Failed to submit leave request.", "error");
     } finally {
       setLoading(false);

@@ -7,36 +7,30 @@ export default function ClassDetails() {
   const { classId } = useParams();
   const navigate = useNavigate();
   const [classDetails, setClassDetails] = useState(null);
-  const [students, setStudents] = useState([]); // بيانات التسجيل للطلاب في الصف (studentId + classId)
-  const [users, setUsers] = useState([]); // بيانات كل المستخدمين (بها الاسم والايميل)
+  const [students, setStudents] = useState([]);
+  const [users, setUsers] = useState([]); 
   const [loading, setLoading] = useState(true);
+
+  const baseURL = "https://student-management-system-pnb9.onrender.com";
+  const token = localStorage.getItem("token") || "";
+  const axiosConfig = {
+    headers: { Authorization: `Bearer ${token}` },
+  };
 
   useEffect(() => {
     const fetchData = async () => {
       try {
-        // جلب بيانات الصف
-        const classRes = await axios.get(
-          `https://6837ad992c55e01d184a8113.mockapi.io/Class/${classId}`
-        );
+        const classRes = await axios.get(`${baseURL}/classes/${classId}`, axiosConfig);
         setClassDetails(classRes.data);
 
-        // جلب الطلاب المسجلين لهذا الصف
-        const studentsRes = await axios.get(
-          "https://685cc514769de2bf085dc721.mockapi.io/students"
-        );
-        // فلترة الطلاب حسب classId
-        const filteredStudents = studentsRes.data.filter(
-          (s) => String(s.classId) === String(classId)
-        );
-        setStudents(filteredStudents);
+        const studentsRes = await axios.get(`${baseURL}/classes/${classId}/students`, axiosConfig);
+        setStudents(studentsRes.data);
 
-        // جلب بيانات المستخدمين (اللي فيها الاسم والايميل)
-        const usersRes = await axios.get(
-          "https://6837ad992c55e01d184a8113.mockapi.io/users"
-        );
+        const usersRes = await axios.get(`${baseURL}/users`, axiosConfig);
         setUsers(usersRes.data);
       } catch (error) {
         console.error("Error fetching data:", error);
+        alert("Failed to fetch class details or students.");
       } finally {
         setLoading(false);
       }
@@ -45,7 +39,6 @@ export default function ClassDetails() {
     fetchData();
   }, [classId]);
 
-  // دالة ترجع بيانات المستخدم (اسم وإيميل) حسب studentId (اللي هو user.id)
   const getUserByStudentId = (studentId) => {
     return users.find((user) => String(user.id) === String(studentId)) || null;
   };
@@ -80,7 +73,6 @@ export default function ClassDetails() {
         </h1>
       </header>
 
-      {/* تفاصيل الصف */}
       <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
         <h2 className="text-2xl font-semibold mb-5 border-b-2 border-indigo-600 pb-2">
           General Information
@@ -116,7 +108,6 @@ export default function ClassDetails() {
         </ul>
       </div>
 
-      {/* جدول الطلاب */}
       <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
         <h2 className="text-2xl font-semibold mb-5 border-b-2 border-indigo-600 pb-2">
           Registered Students

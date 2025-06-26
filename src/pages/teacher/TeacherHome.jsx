@@ -3,6 +3,8 @@ import { Link, Navigate } from "react-router-dom";
 import axios from "axios";
 import { AiOutlineUsergroupAdd, AiOutlineUnorderedList } from "react-icons/ai";
 
+const baseURL = "https://student-management-system-pnb9.onrender.com";
+
 export default function TeacherHome() {
   const token = localStorage.getItem("token");
   const user = JSON.parse(localStorage.getItem("user") || "{}");
@@ -18,9 +20,9 @@ export default function TeacherHome() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const classesRes = await axios.get(
-          "https://6837ad992c55e01d184a8113.mockapi.io/Class"
-        );
+        const classesRes = await axios.get(`${baseURL}/classes`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
         const allClasses = classesRes.data;
 
         setStats({
@@ -38,7 +40,7 @@ export default function TeacherHome() {
     };
 
     fetchData();
-  }, []);
+  }, [token]);
 
   if (loading) {
     return (

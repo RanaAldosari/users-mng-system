@@ -3,11 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 
-const attendanceUrl = "https://68219a21259dad2655afc28a.mockapi.io/Attendance";
-const userUrl = "https://6837ad992c55e01d184a8113.mockapi.io/users";
-const classUrl = "https://6837ad992c55e01d184a8113.mockapi.io/Class";
-const studentsUrl = "https://685cc514769de2bf085dc721.mockapi.io/students";
-
 export default function AddAttendance() {
   const { classId } = useParams();
   const navigate = useNavigate();
@@ -18,38 +13,39 @@ export default function AddAttendance() {
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
+  const baseURL = "https://student-management-system-pnb9.onrender.com";
+  const token = localStorage.getItem("token") || "";
+  const axiosConfig = {
+    headers: { Authorization: `Bearer ${token}` },
+  };
+
   useEffect(() => {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch class details
-        const classRes = await axios.get(`${classUrl}/${classId}`);
+        const classRes = await axios.get(`${baseURL}/classes/${classId}`, axiosConfig);
         setClassName(classRes.data?.name || "Unknown Class");
 
-        // Fetch students in this class
-        const studentsRes = await axios.get(studentsUrl);
-        const classStudents = studentsRes.data.filter(
-          (s) => String(s.classId) === String(classId)
+        const studentsRes = await axios.get(
+          `${baseURL}/classes/${classId}/students`,
+          axiosConfig
         );
 
-        // Fetch all users (students and teachers)
-        const usersRes = await axios.get(userUrl);
+        const usersRes = await axios.get(`${baseURL}/users`, axiosConfig);
         const users = usersRes.data;
 
-        // Map students with user details
-        const enrolledStudents = classStudents
-          .map((s) => {
-            const user = users.find((u) => String(u.id) === String(s.studentId));
-            return user ? { ...s, name: user.name, email: user.email } : null;
+        const enrolledStudents = studentsRes.data
+          .map((student) => {
+            const user = users.find((u) => String(u.id) === String(student.userId));
+            return user ? { ...student, name: user.name, email: user.email } : null;
           })
           .filter(Boolean);
 
         setStudents(enrolledStudents);
 
-        // Initialize attendance as "absent" for all
         const initialAttendance = {};
         enrolledStudents.forEach((stu) => {
-          initialAttendance[stu.studentId] = "absent";
+          initialAttendance[stu.userId] = "absent";
         });
         setAttendanceData(initialAttendance);
       } catch (err) {
@@ -63,23 +59,32 @@ export default function AddAttendance() {
     fetchData();
   }, [classId]);
 
-  const handleStatusChange = (attendeeId, newStatus) => {
-    setAttendanceData((prev) => ({ ...prev, [attendeeId]: newStatus }));
+  const handleStatusChange = (userId, newStatus) => {
+    setAttendanceData((prev) => ({ ...prev, [userId]: newStatus }));
   };
 
   const handleSaveAttendance = async () => {
     setSaving(true);
     try {
       const attendedAt = new Date().toISOString();
-      const promises = Object.entries(attendanceData).map(([attendeeId, status]) =>
-        axios.post(attendanceUrl, {
-          classId,
-          attendeeId,
-          status,
-          attendedAt,
-        })
+
+      const promises = Object.entries(attendanceData).map(
+        async ([userId, status]) => {
+          return axios.post(
+            `${baseURL}/attendances`,
+            {
+              classId,
+              userId,
+              status,
+              attendedAt,
+            },
+            axiosConfig
+          );
+        }
       );
+
       await Promise.all(promises);
+
       alert("Attendance saved successfully");
       navigate(-1);
     } catch (err) {
@@ -124,12 +129,12 @@ export default function AddAttendance() {
             </thead>
             <tbody>
               {students.map((stu) => (
-                <tr key={stu.studentId} className="hover:bg-indigo-50">
+                <tr key={stu.userId} className="hover:bg-indigo-50">
                   <td className="py-3 px-6 border border-gray-300">{stu.name || "No Name"}</td>
                   <td className="py-3 px-6 border border-gray-300">
                     <select
-                      value={attendanceData[stu.studentId]}
-                      onChange={(e) => handleStatusChange(stu.studentId, e.target.value)}
+                      value={attendanceData[stu.userId]}
+                      onChange={(e) => handleStatusChange(stu.userId, e.target.value)}
                       className="border border-gray-300 rounded px-3 py-1 text-indigo-900"
                     >
                       <option value="present">Present</option>

@@ -8,18 +8,23 @@ export default function ManageAttendance() {
   const navigate = useNavigate();
 
   const [classes, setClasses] = useState([]);
-  const [students, setStudents] = useState([]);
-  const [participants, setParticipants] = useState([]);
+  const [users, setUsers] = useState([]);       
+  const [students, setStudents] = useState([]); 
   const [attendance, setAttendance] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(null);
   const [loading, setLoading] = useState(false);
+  const [selectedDate, setSelectedDate] = useState(null);
   const [editingId, setEditingId] = useState(null);
   const [editedTime, setEditedTime] = useState("");
 
-  const classUrl = "https://6837ad992c55e01d184a8113.mockapi.io/Class";
-  const userUrl = "https://683cc42f199a0039e9e35f20.mockapi.io/user";
-  const participantUrl = "https://683cc42f199a0039e9e35f20.mockapi.io/Participant";
-  const attendanceUrl = "https://68219a21259dad2655afc28a.mockapi.io/Attendance";
+  const baseURL = "https://student-management-system-pnb9.onrender.com";
+
+  const token = localStorage.getItem("token") || "";
+
+  const axiosConfig = {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    },
+  };
 
   useEffect(() => {
     if (!classId) return;
@@ -29,42 +34,35 @@ export default function ManageAttendance() {
   const fetchAllData = async () => {
     setLoading(true);
     try {
-      const [classesRes, studentsRes, participantsRes, attendanceRes] =
-        await Promise.all([
-          axios.get(classUrl),
-          axios.get(userUrl),
-          axios.get(participantUrl),
-          axios.get(attendanceUrl),
-        ]);
+      const [classesRes, usersRes, studentsRes, attendanceRes] = await Promise.all([
+        axios.get(`${baseURL}/classes`, axiosConfig),
+        axios.get(`${baseURL}/users`, axiosConfig),
+        axios.get(`${baseURL}/classes/${classId}/students`, axiosConfig),
+        axios.get(`${baseURL}/classes/${classId}/attendance`, axiosConfig),
+      ]);
 
       setClasses(classesRes.data || []);
-      setStudents(studentsRes.data.filter((u) => u.role === "student") || []);
-      const studentParticipants = participantsRes.data.filter(
-        (p) =>
-          String(p.classId) === String(classId) &&
-          studentsRes.data.some((u) => u.id === p.userId && u.role === "student")
-      );
-
-      setParticipants(studentParticipants);
-
-      setAttendance(
-        attendanceRes.data.filter((att) => String(att.classId) === String(classId))
-      );
+      setUsers(usersRes.data || []);
+      setStudents(studentsRes.data || []);
+      setAttendance(attendanceRes.data || []);
     } catch (error) {
       console.error("Error fetching data:", error);
+      alert("Failed to fetch data from server.");
     } finally {
       setLoading(false);
     }
   };
 
+  const getStudentName = (studentId) => {
+    const user = users.find((u) => String(u.id) === String(studentId));
+    return user ? user.name : "Unknown Student";
+  };
+
   const getClassName = () => {
-    const found = classes.find((cls) => cls.id === classId);
+    const found = classes.find((cls) => String(cls.id) === String(classId));
     return found ? found.name : "Unknown Class";
   };
 
-  const getStudentById = (userId) => students.find((s) => String(s.id) === String(userId));
-
-  // تعديل هنا: استخدام toDateString للمقارنة بدون وقت
   const getAttendanceDates = () =>
     Array.from(
       new Set(attendance.map((rec) => new Date(rec.attendedAt).toDateString()))
@@ -72,7 +70,6 @@ export default function ManageAttendance() {
 
   const attendanceDates = getAttendanceDates();
 
-  // تعديل هنا: مقارنة التواريخ باستخدام toDateString
   const attendanceForSelectedDate = selectedDate
     ? attendance.filter(
         (rec) =>
@@ -111,7 +108,7 @@ export default function ManageAttendance() {
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
           <p className="text-sm text-gray-500 uppercase mb-1">Registered Students</p>
-          <p className="text-5xl font-extrabold text-indigo-700">{participants.length}</p>
+          <p className="text-5xl font-extrabold text-indigo-700">{students.length}</p>
         </div>
         <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
           <p className="text-sm text-gray-500 uppercase mb-1">Attendance Days</p>
@@ -167,32 +164,28 @@ export default function ManageAttendance() {
               <thead className="bg-indigo-700 text-white">
                 <tr>
                   <th className="py-3 px-6 border border-gray-300 text-left">Student</th>
-                  <th className="py-3 px-6 border border-gray-300 text-left">Time</th>
+                  <th className="py-3 px-6 border border-gray-300 text-left">Status</th>
                   <th className="py-3 px-6 border border-gray-300 text-center">Actions</th>
                 </tr>
               </thead>
               <tbody>
-                {participants.map((participant) => {
-                  const student = getStudentById(participant.userId);
-                  const attendanceRecord = attendance.find(
-                    (rec) =>
-                      rec.attendeeId === participant.userId &&
-                      new Date(rec.attendedAt).toDateString() ===
-                        new Date(selectedDate).toDateString()
+                {students.map((student) => {
+                  const attendanceRecord = attendanceForSelectedDate.find(
+                    (rec) => String(rec.attendeeId) === String(student.id)
                   );
 
                   const status = attendanceRecord ? attendanceRecord.status : "absent";
 
                   return (
                     <tr
-                      key={participant.id}
+                      key={student.id}
                       className="hover:bg-indigo-50 transition-colors duration-200"
                     >
                       <td className="py-3 px-6 border border-gray-300">
-                        {student ? student.name : "Unknown Student"}
+                        {getStudentName(student.id)}
                       </td>
                       <td className="py-3 px-6 border border-gray-300">
-                        {editingId === participant.userId ? (
+                        {editingId === student.id ? (
                           <select
                             value={editedTime}
                             onChange={(e) => setEditedTime(e.target.value)}
@@ -208,13 +201,13 @@ export default function ManageAttendance() {
                         )}
                       </td>
                       <td className="py-3 px-6 border border-gray-300 text-center">
-                        {editingId === participant.userId ? (
+                        {editingId === student.id ? (
                           <div className="flex flex-col md:flex-row items-center justify-center gap-2">
                             <button
                               onClick={async () => {
                                 const newRecord = {
                                   classId,
-                                  attendeeId: participant.userId,
+                                  attendeeId: student.id,
                                   status: editedTime,
                                   attendedAt: new Date().toISOString(),
                                 };
@@ -222,11 +215,16 @@ export default function ManageAttendance() {
                                 try {
                                   if (attendanceRecord) {
                                     await axios.put(
-                                      `${attendanceUrl}/${attendanceRecord.id}`,
-                                      newRecord
+                                      `${baseURL}/classes/${classId}/attendance/${attendanceRecord.id}`,
+                                      newRecord,
+                                      axiosConfig
                                     );
                                   } else {
-                                    await axios.post(attendanceUrl, newRecord);
+                                    await axios.post(
+                                      `${baseURL}/classes/${classId}/attendance`,
+                                      newRecord,
+                                      axiosConfig
+                                    );
                                   }
                                   setEditingId(null);
                                   fetchAllData();
@@ -249,7 +247,7 @@ export default function ManageAttendance() {
                         ) : (
                           <button
                             onClick={() => {
-                              setEditingId(participant.userId);
+                              setEditingId(student.id);
                               setEditedTime(status);
                             }}
                             className="text-indigo-800 cursor-pointer border border-indigo-800 rounded px-3 py-1 w-34"
