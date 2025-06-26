@@ -11,9 +11,8 @@ export default function TeacherHome() {
     return <Navigate to="/login" replace />;
   }
 
-  const [stats, setStats] = useState({ totalClasses: 0, totalStudents: 0 });
+  const [stats, setStats] = useState({ totalClasses: 0 });
   const [classes, setClasses] = useState([]);
-  const [participants, setParticipants] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -24,38 +23,15 @@ export default function TeacherHome() {
         );
         const allClasses = classesRes.data;
 
-        const participantsRes = await axios.get(
-          "https://683cc42f199a0039e9e35f20.mockapi.io/Participant"
-        );
-        const allParticipants = participantsRes.data;
-
-        const usersRes = await axios.get(
-          "https://683cc42f199a0039e9e35f20.mockapi.io/user"
-        );
-        const users = usersRes.data;
-
-        const studentIds = new Set(
-          users.filter((u) => u.role === "student").map((u) => u.id)
-        );
-
-        const participatingStudents = new Set(
-          allParticipants
-            .filter((p) => studentIds.has(p.userId))
-            .map((p) => p.userId)
-        );
-
         setStats({
           totalClasses: allClasses.length,
-          totalStudents: participatingStudents.size,
         });
 
         setClasses(allClasses);
-        setParticipants(allParticipants);
       } catch (error) {
         console.error("Error fetching data:", error);
-        setStats({ totalClasses: 0, totalStudents: 0 });
+        setStats({ totalClasses: 0 });
         setClasses([]);
-        setParticipants([]);
       } finally {
         setLoading(false);
       }
@@ -76,15 +52,9 @@ export default function TeacherHome() {
         Welcome, Teacher!
       </h1>
 
-      <section className="grid grid-cols-1 md:grid-cols-2 gap-8">
-        <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-          <p className="text-sm text-gray-500 uppercase mb-1">Total Classes</p>
-          <p className="text-5xl font-extrabold text-indigo-700">{stats.totalClasses}</p>
-        </div>
-        <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
-          <p className="text-sm text-gray-500 uppercase mb-1">Total Students</p>
-          <p className="text-5xl font-extrabold text-indigo-700">{stats.totalStudents}</p>
-        </div>
+      <section className="bg-white rounded-lg shadow p-6 flex flex-col items-center max-w-xs mx-auto">
+        <p className="text-sm text-gray-500 uppercase mb-1">Total Classes</p>
+        <p className="text-5xl font-extrabold text-indigo-700">{stats.totalClasses}</p>
       </section>
 
       <section>

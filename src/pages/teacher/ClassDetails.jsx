@@ -7,43 +7,47 @@ export default function ClassDetails() {
   const { classId } = useParams();
   const navigate = useNavigate();
   const [classDetails, setClassDetails] = useState(null);
-  const [participants, setParticipants] = useState([]);
-  const [students, setStudents] = useState([]);
+  const [students, setStudents] = useState([]); // بيانات التسجيل للطلاب في الصف (studentId + classId)
+  const [users, setUsers] = useState([]); // بيانات كل المستخدمين (بها الاسم والايميل)
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    const fetchClassDetails = async () => {
+    const fetchData = async () => {
       try {
+        // جلب بيانات الصف
         const classRes = await axios.get(
           `https://6837ad992c55e01d184a8113.mockapi.io/Class/${classId}`
         );
         setClassDetails(classRes.data);
 
-        const participantsRes = await axios.get(
-          "https://683cc42f199a0039e9e35f20.mockapi.io/Participant"
+        // جلب الطلاب المسجلين لهذا الصف
+        const studentsRes = await axios.get(
+          "https://685cc514769de2bf085dc721.mockapi.io/students"
         );
-        const allParticipants = participantsRes.data.filter(
-          (p) => String(p.classId) === String(classId)
+        // فلترة الطلاب حسب classId
+        const filteredStudents = studentsRes.data.filter(
+          (s) => String(s.classId) === String(classId)
         );
-        setParticipants(allParticipants);
+        setStudents(filteredStudents);
 
+        // جلب بيانات المستخدمين (اللي فيها الاسم والايميل)
         const usersRes = await axios.get(
-          "https://683cc42f199a0039e9e35f20.mockapi.io/user"
+          "https://6837ad992c55e01d184a8113.mockapi.io/users"
         );
-        const allStudents = usersRes.data.filter((u) => u.role === "student");
-        setStudents(allStudents);
+        setUsers(usersRes.data);
       } catch (error) {
-        console.error("Error fetching class details:", error);
+        console.error("Error fetching data:", error);
       } finally {
         setLoading(false);
       }
     };
 
-    fetchClassDetails();
+    fetchData();
   }, [classId]);
 
-  const getStudentById = (userId) => {
-    return students.find((u) => String(u.id) === String(userId)) || null;
+  // دالة ترجع بيانات المستخدم (اسم وإيميل) حسب studentId (اللي هو user.id)
+  const getUserByStudentId = (studentId) => {
+    return users.find((user) => String(user.id) === String(studentId)) || null;
   };
 
   if (loading) {
@@ -55,16 +59,10 @@ export default function ClassDetails() {
   if (!classDetails) {
     return (
       <div className="p-6 text-center text-red-600 font-semibold">
-        Class not found or no participants registered.
+        Class not found.
       </div>
     );
   }
-
-  // filter (role === "student") to avoid teacher
-  const filteredParticipants = participants.filter((participant) => {
-    const student = getStudentById(participant.userId);
-    return student !== null;
-  });
 
   return (
     <div className="min-h-screen bg-neutral-50 text-indigo-900 p-8 max-w-7xl mx-auto space-y-8">
@@ -82,7 +80,7 @@ export default function ClassDetails() {
         </h1>
       </header>
 
-      {/* class details */}
+      {/* تفاصيل الصف */}
       <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
         <h2 className="text-2xl font-semibold mb-5 border-b-2 border-indigo-600 pb-2">
           General Information
@@ -118,12 +116,12 @@ export default function ClassDetails() {
         </ul>
       </div>
 
-      {/* display students in the class*/}
+      {/* جدول الطلاب */}
       <div className="bg-white p-6 rounded-lg shadow-md max-w-4xl mx-auto">
         <h2 className="text-2xl font-semibold mb-5 border-b-2 border-indigo-600 pb-2">
           Registered Students
         </h2>
-        {filteredParticipants.length === 0 ? (
+        {students.length === 0 ? (
           <p className="text-center text-gray-500 text-lg">
             No students are registered for this class.
           </p>
@@ -136,15 +134,19 @@ export default function ClassDetails() {
               </tr>
             </thead>
             <tbody>
-              {filteredParticipants.map((participant) => {
-                const student = getStudentById(participant.userId);
+              {students.map((student) => {
+                const user = getUserByStudentId(student.studentId);
                 return (
                   <tr
-                    key={participant.id}
+                    key={student.id}
                     className="hover:bg-indigo-50 transition-colors duration-200"
                   >
-                    <td className="px-5 py-3 border border-gray-300">{student.name}</td>
-                    <td className="px-5 py-3 border border-gray-300">{student.email}</td>
+                    <td className="px-5 py-3 border border-gray-300">
+                      {user ? user.name : "Unknown"}
+                    </td>
+                    <td className="px-5 py-3 border border-gray-300">
+                      {user ? user.email : "-"}
+                    </td>
                   </tr>
                 );
               })}

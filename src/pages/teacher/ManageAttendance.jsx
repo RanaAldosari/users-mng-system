@@ -1,9 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
 import axios from "axios";
-import { AiOutlinePlus } from "react-icons/ai";
-import { AiOutlineArrowLeft } from "react-icons/ai";
-
+import { AiOutlinePlus, AiOutlineArrowLeft } from "react-icons/ai";
 
 export default function ManageAttendance() {
   const { classId } = useParams();
@@ -66,17 +64,23 @@ export default function ManageAttendance() {
 
   const getStudentById = (userId) => students.find((s) => String(s.id) === String(userId));
 
-
+  // تعديل هنا: استخدام toDateString للمقارنة بدون وقت
   const getAttendanceDates = () =>
-    Array.from(new Set(attendance.map((rec) => new Date(rec.attendedAt).toDateString())));
+    Array.from(
+      new Set(attendance.map((rec) => new Date(rec.attendedAt).toDateString()))
+    );
 
   const attendanceDates = getAttendanceDates();
 
+  // تعديل هنا: مقارنة التواريخ باستخدام toDateString
   const attendanceForSelectedDate = selectedDate
-    ? attendance.filter((rec) => new Date(rec.attendedAt).toDateString() === selectedDate)
+    ? attendance.filter(
+        (rec) =>
+          new Date(rec.attendedAt).toDateString() ===
+          new Date(selectedDate).toDateString()
+      )
     : [];
 
-  // calculate new attendance id
   const getNextAttendanceId = () => {
     if (attendance.length === 0) return 1;
     const maxId = attendance.reduce((max, item) => {
@@ -104,7 +108,6 @@ export default function ManageAttendance() {
         </h1>
       </header>
 
-      {/* stat */}
       <section className="grid grid-cols-1 md:grid-cols-2 gap-8 mb-12">
         <div className="bg-white rounded-lg shadow p-6 flex flex-col items-center">
           <p className="text-sm text-gray-500 uppercase mb-1">Registered Students</p>
@@ -116,7 +119,6 @@ export default function ManageAttendance() {
         </div>
       </section>
 
-      {/* choose date and add new*/}
       <section className="flex flex-col md:flex-row md:items-center justify-between bg-white p-5 rounded-lg shadow mb-10 max-w-6/12">
         <div className="mb-4 md:mb-0 flex flex-col md:flex-row items-center space-x-4">
           <label htmlFor="attendanceDate" className="font-semibold text-lg">
@@ -127,10 +129,12 @@ export default function ManageAttendance() {
             className="border border-gray-300 rounded px-4 py-2 text-indigo-900"
             value={selectedDate || ""}
             onChange={(e) => setSelectedDate(e.target.value)}
-            disabled={attendanceDates.length === 0} // if no date disable select
+            disabled={attendanceDates.length === 0}
           >
             <option value="" disabled>
-              {attendanceDates.length === 0 ? "No attendance dates available" : "-- Choose a date --"}
+              {attendanceDates.length === 0
+                ? "No attendance dates available"
+                : "-- Choose a date --"}
             </option>
             {attendanceDates.map((dateStr) => (
               <option key={dateStr} value={dateStr}>
@@ -148,8 +152,6 @@ export default function ManageAttendance() {
         </button>
       </section>
 
-
-      {/* attecndance table */}
       {selectedDate && (
         <section className="bg-white rounded-lg shadow overflow-x-auto p-6">
           <h2 className="text-xl font-semibold mb-6 text-indigo-800">
@@ -175,7 +177,8 @@ export default function ManageAttendance() {
                   const attendanceRecord = attendance.find(
                     (rec) =>
                       rec.attendeeId === participant.userId &&
-                      new Date(rec.attendedAt).toDateString() === selectedDate
+                      new Date(rec.attendedAt).toDateString() ===
+                        new Date(selectedDate).toDateString()
                   );
 
                   const status = attendanceRecord ? attendanceRecord.status : "absent";
@@ -206,7 +209,7 @@ export default function ManageAttendance() {
                       </td>
                       <td className="py-3 px-6 border border-gray-300 text-center">
                         {editingId === participant.userId ? (
-                          <div className=" flex flex-col md:flex-row items-center justify-center gap-2">
+                          <div className="flex flex-col md:flex-row items-center justify-center gap-2">
                             <button
                               onClick={async () => {
                                 const newRecord = {
@@ -232,7 +235,7 @@ export default function ManageAttendance() {
                                   alert("Failed to save attendance record.");
                                 }
                               }}
-                              className="border border-green-600 text-green-600 hover:text-green-700  rounded px-3 py-1 w-16"
+                              className="border border-green-600 text-green-600 hover:text-green-700 rounded px-3 py-1 w-16"
                             >
                               Save
                             </button>
@@ -259,7 +262,6 @@ export default function ManageAttendance() {
                   );
                 })}
               </tbody>
-
             </table>
           )}
         </section>

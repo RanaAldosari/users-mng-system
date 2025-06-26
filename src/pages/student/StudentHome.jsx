@@ -24,25 +24,26 @@ export default function StudentHome() {
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const participantRes = await axios.get(
-          "https://683cc42f199a0039e9e35f20.mockapi.io/Participant"
+        // Fetch classes for the student
+        const studentRes = await axios.get(
+          "https://685cc514769de2bf085dc721.mockapi.io/students"
         );
-        const allParticipants = participantRes.data.filter(
-          (p) => p.userId === user.id
+        const enrolledStudents = studentRes.data.filter(
+          (s) => String(s.studentId) === String(user.id)
         );
 
         const classRes = await axios.get(
           "https://6837ad992c55e01d184a8113.mockapi.io/Class"
         );
-        const enrolledClasses = classRes.data.filter((c) =>
-          allParticipants.some((p) => p.classId === c.id)
+        const enrolledClasses = classRes.data.filter((cls) =>
+          enrolledStudents.some((s) => String(s.classId) === String(cls.id))
         );
 
         const attendanceRes = await axios.get(
           "https://68219a21259dad2655afc28a.mockapi.io/Attendance"
         );
         const attendanceRecords = attendanceRes.data.filter(
-          (a) => a.attendeeId === user.id
+          (a) => String(a.attendeeId) === String(user.id)
         );
 
         const presentDays = attendanceRecords.filter(
@@ -89,7 +90,7 @@ export default function StudentHome() {
   return (
     <div className="min-h-screen bg-neutral-50 text-indigo-900 p-8 max-w-7xl mx-auto space-y-10">
       <h1 className="text-3xl font-extrabold border-b-4 border-indigo-600 pb-2 text-center">
-        Welcome, Student !
+        Welcome, Student!
       </h1>
 
       {/* Statistics Section */}

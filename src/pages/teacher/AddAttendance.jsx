@@ -4,9 +4,9 @@ import axios from "axios";
 import { AiOutlineArrowLeft } from "react-icons/ai";
 
 const attendanceUrl = "https://68219a21259dad2655afc28a.mockapi.io/Attendance";
-const participantUrl = "https://683cc42f199a0039e9e35f20.mockapi.io/Participant";
-const userUrl = "https://683cc42f199a0039e9e35f20.mockapi.io/user";
+const userUrl = "https://6837ad992c55e01d184a8113.mockapi.io/users";
 const classUrl = "https://6837ad992c55e01d184a8113.mockapi.io/Class";
+const studentsUrl = "https://685cc514769de2bf085dc721.mockapi.io/students";
 
 export default function AddAttendance() {
   const { classId } = useParams();
@@ -22,32 +22,34 @@ export default function AddAttendance() {
     const fetchData = async () => {
       setLoading(true);
       try {
-        // Fetch class name
-        const classRes = await axios.get(classUrl);
-        const cls = classRes.data.find((c) => String(c.id) === String(classId));
-        setClassName(cls ? cls.name : "Unknown Class");
+        // Fetch class details
+        const classRes = await axios.get(`${classUrl}/${classId}`);
+        setClassName(classRes.data?.name || "Unknown Class");
 
-        // Fetch participants in class
-        const participantsRes = await axios.get(participantUrl);
-        const classParticipants = participantsRes.data.filter(
-          (p) => String(p.classId) === String(classId)
+        // Fetch students in this class
+        const studentsRes = await axios.get(studentsUrl);
+        const classStudents = studentsRes.data.filter(
+          (s) => String(s.classId) === String(classId)
         );
 
-        // Fetch all users
+        // Fetch all users (students and teachers)
         const usersRes = await axios.get(userUrl);
-        const users = usersRes.data.filter((u) => u.role === "student");
+        const users = usersRes.data;
 
-        // Map participants to student users
-        const enrolledStudents = classParticipants
-          .map((p) => users.find((u) => String(u.id) === String(p.userId)))
+        // Map students with user details
+        const enrolledStudents = classStudents
+          .map((s) => {
+            const user = users.find((u) => String(u.id) === String(s.studentId));
+            return user ? { ...s, name: user.name, email: user.email } : null;
+          })
           .filter(Boolean);
 
         setStudents(enrolledStudents);
 
-        // Initialize attendance status as "absent" for all
+        // Initialize attendance as "absent" for all
         const initialAttendance = {};
         enrolledStudents.forEach((stu) => {
-          initialAttendance[stu.id] = "absent";
+          initialAttendance[stu.studentId] = "absent";
         });
         setAttendanceData(initialAttendance);
       } catch (err) {
@@ -68,7 +70,7 @@ export default function AddAttendance() {
   const handleSaveAttendance = async () => {
     setSaving(true);
     try {
-      const attendedAt = new Date().toISOString(); // Today date
+      const attendedAt = new Date().toISOString();
       const promises = Object.entries(attendanceData).map(([attendeeId, status]) =>
         axios.post(attendanceUrl, {
           classId,
@@ -122,12 +124,12 @@ export default function AddAttendance() {
             </thead>
             <tbody>
               {students.map((stu) => (
-                <tr key={stu.id} className="hover:bg-indigo-50">
+                <tr key={stu.studentId} className="hover:bg-indigo-50">
                   <td className="py-3 px-6 border border-gray-300">{stu.name || "No Name"}</td>
                   <td className="py-3 px-6 border border-gray-300">
                     <select
-                      value={attendanceData[stu.id]}
-                      onChange={(e) => handleStatusChange(stu.id, e.target.value)}
+                      value={attendanceData[stu.studentId]}
+                      onChange={(e) => handleStatusChange(stu.studentId, e.target.value)}
                       className="border border-gray-300 rounded px-3 py-1 text-indigo-900"
                     >
                       <option value="present">Present</option>
