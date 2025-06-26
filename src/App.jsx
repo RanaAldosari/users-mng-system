@@ -1,11 +1,11 @@
-import Router11 from "./router/Router11"
+import Router from "./router/Router";
 function App() {
-return (
+  return (
     <>
-      <Routerr />
-
+      {/* <h2>test</h2> */}
+      <Router></Router>
     </>
-  )
+  );
 }
 
-export default App
+export default App;

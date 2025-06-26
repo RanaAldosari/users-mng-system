@@ -1,153 +1,157 @@
-import axios from 'axios';
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router';
+// src/components/AdminPageClass.jsx
+import axios from "axios";
+import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
-function AdminPageClass() {
-  const [className, setClassName] = useState('');
-  const [teacherId, setTeacherId] = useState('');
+const API_BASE = "https://student-management-system-pnb9.onrender.com";
+
+export default function AdminPageClass() {
+  const [className, setClassName] = useState("");
+  const [teacherId, setTeacherId] = useState("");
   const [studentsList, setStudentsList] = useState([]);
   const [teachersList, setTeachersList] = useState([]);
-  const [adminsList, setAdminsList] = useState([]);
   const [selectedStudents, setSelectedStudents] = useState([]);
+  const [studentSearch, setStudentSearch] = useState("");
   const navigate = useNavigate();
-
-  // const BASE_URL = 'https://student-management-system-pnb9.onrender.com/api';
-  const BASE_URL = 'https://student-management-system-pnb9.onrender.com';
-
-  const token = localStorage.getItem('token');
+  const token = localStorage.getItem("token");
 
   useEffect(() => {
-    axios.get(`${BASE_URL}/users`, {
-      headers: {
-        Authorization: `Bearer ${token}`
-      }
-    })
-.then(res => {
-      const users = res.data;
-      setStudentsList(users.filter(user => user.role === 'student').slice(0, 20)); 
-      setTeachersList(users.filter(user => user.role === 'teacher').slice(0, 2));
-      setAdminsList(users.filter(user => user.role === 'admin'));
-    })
-    
-    .catch(err => console.error('Error fetching users:', err));
-}, [token]);
+    axios
+      .get(`${API_BASE}/users`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+      .then((res) => {
+        const users = res.data;
+        setStudentsList(users.filter((u) => u.role === "student"));
+        setTeachersList(users.filter((u) => u.role === "teacher"));
+      })
+      .catch((err) => console.error("Error fetching users:", err));
+  }, [token]);
 
-  const handleStudent = (id) => {
-    setSelectedStudents(prev =>
-      prev.includes(id)
-        ? prev.filter(sid => sid !== id)
-        : [...prev, id]
+  const handleStudentToggle = (id) => {
+    setSelectedStudents((prev) =>
+      prev.includes(id) ? prev.filter((s) => s !== id) : [...prev, id]
     );
   };
 
-  const CreateClass = async () => {
-    if (!className || !teacherId || selectedStudents.length !== 20) {
-      alert('All fields are required and you must select exactly 20 students.');
+  const createClass = async () => {
+    if (!className || !teacherId || selectedStudents.length === 0) {
+      alert("Please fill all fields and select at least one student.");
       return;
     }
-
     try {
-// create class
-      const classRes = await axios.post(`${BASE_URL}/classes`, {
-        name: className
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      const classId = classRes.data._id;
-// add teachers
-      await axios.post(`${BASE_URL}/classes/${classId}/teachers`, {
-        teacherIds: [teacherId]
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-// add students
-      await axios.post(`${BASE_URL}/classes/${classId}/students`, {
-        studentIds: selectedStudents
-      }, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        }
-      });
-
-      alert('Class created successfully!');
-      navigate('/viewclass');
+      const { data: cls } = await axios.post(
+        `${API_BASE}/classes`,
+        { name: className },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      await axios.post(
+        `${API_BASE}/classes/${cls.id}/teachers`,
+        { teacherIds: [teacherId] },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      await axios.post(
+        `${API_BASE}/classes/${cls.id}/students`,
+        { studentIds: selectedStudents },
+        { headers: { Authorization: `Bearer ${token}` } }
+      );
+      alert("Class created successfully!");
+      navigate("/Admin/viewclass");
     } catch (err) {
-       console.error('Failed to create class:', err.response?.data || err.message);
-      console.error('Failed to create class:', err);
-      alert('failed to create class');
+      console.error(err);
+      alert("Failed to create class.");
     }
   };
 
+  // filter students by search term
+  const filteredStudents = studentsList.filter((u) => {
+    const term = studentSearch.toLowerCase();
+    return (
+      (u.email || "").toLowerCase().includes(term) ||
+      (u.id || u._id || "").toLowerCase().includes(term)
+    );
+  });
+
   return (
-    <div className="max-w-xl mx-auto mt-6">
-      <h2 className="text-2xl font-bold mb-4">Create a New Class</h2>
-{/* class */}
-      <div className="mb-4">
-        <label className="block mb-1 font-medium">Class Name:</label>
-        <input
-          type="text"
-          className="border px-3 py-2 w-full"
-          value={className}
-          onChange={(e) => setClassName(e.target.value)}
-        />
-      </div>
-{/* display teacher */}
-      <div className="mb-4">
-        <label className="block mb-1 font-medium">Assign Teacher:</label>
-        <select
-          value={teacherId}
-          onChange={(e) => setTeacherId(e.target.value)}
-          className="border px-3 py-2 w-full"
-        >
-          <option value="">Select Teacher</option>
-          {teachersList.map(t => (
-            <option key={t._id} value={t._id}>
-              {t.name || t.email}
-            </option>
-          ))}
-        </select>
-      </div>
-{/* display students */}
-      <div className="mb-4">
-        <label className="block mb-1 font-medium">Assign Students:</label>
-        <div className="grid grid-cols-2 gap-2 max-h-60 overflow-y-auto border p-2">
-          {studentsList.map(student => (
-            <label key={student._id} className="flex items-center">
+    <div className="min-h-screen bg-neutral-50 p-4 sm:p-6 lg:p-8">
+      <div className="max-w-4xl mx-auto bg-white shadow rounded-lg p-6">
+        <h2 className="text-2xl font-bold mb-4 text-center">
+          Create New Class
+        </h2>
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Left: Class Name & Teacher */}
+          <div className="space-y-4">
+            <div>
+              <label className="block font-medium mb-1">Class Name</label>
               <input
-                type="checkbox"
-                value={student._id}
-                checked={selectedStudents.includes(student._id)}
-                onChange={() => handleStudent(student._id)}
-                disabled={
-                  !selectedStudents.includes(student._id) &&
-                  selectedStudents.length >= 20
-                }
-                className="mr-2"
+                type="text"
+                value={className}
+                onChange={(e) => setClassName(e.target.value)}
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-indigo-500"
+                placeholder="Enter class name"
               />
-              {student.email}
-            </label>
-          ))}
+            </div>
+            <div>
+              <label className="block font-medium mb-1">Assign Teacher</label>
+              <select
+                value={teacherId}
+                onChange={(e) => setTeacherId(e.target.value)}
+                className="w-full border border-gray-300 rounded px-3 py-2 focus:outline-none focus:border-indigo-500"
+              >
+                <option value="">Choose a teacher</option>
+                {teachersList.map((t) => (
+                  <option key={t.id || t._id} value={t.id || t._id}>
+                    {t.email}
+                  </option>
+                ))}
+              </select>
+            </div>
+            <button
+              onClick={createClass}
+              className="w-full bg-green-600 hover:bg-green-700 text-white font-semibold py-2 rounded mt-4"
+            >
+              Create Class
+            </button>
+          </div>
+
+          {/* Right: Student Selection */}
+          <div className="space-y-2">
+            <label className="block font-medium mb-1">Select Students</label>
+            {/* Search input */}
+            <input
+              type="text"
+              value={studentSearch}
+              onChange={(e) => setStudentSearch(e.target.value)}
+              placeholder="Search students..."
+              className="w-full border border-gray-300 rounded px-3 py-2 mb-2 focus:outline-none focus:border-indigo-500"
+            />
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 max-h-64 overflow-y-auto border p-2 rounded">
+              {filteredStudents.map((student) => (
+                <label
+                  key={student.id || student._id}
+                  className="flex items-center space-x-2 p-1 rounded hover:bg-gray-50"
+                >
+                  <input
+                    type="checkbox"
+                    checked={selectedStudents.includes(
+                      student.id || student._id
+                    )}
+                    onChange={() =>
+                      handleStudentToggle(student.id || student._id)
+                    }
+                    className="text-indigo-600 focus:ring-indigo-500 border-gray-300 rounded"
+                  />
+                  <span className="text-sm truncate">{student.email}</span>
+                </label>
+              ))}
+            </div>
+            <p className="text-sm text-gray-500">
+              {selectedStudents.length} student
+              {selectedStudents.length !== 1 && "s"} selected
+            </p>
+          </div>
         </div>
-        <p className="text-sm text-gray-500 mt-1">
-          {selectedStudents.length}/20 selected
-        </p>
       </div>
-
-     
-
-      <button
-        onClick={CreateClass}
-        className="bg-green-600 text-white px-4 py-2 rounded hover:bg-green-700"
-      >
-        Create Class
-      </button>
     </div>
   );
 }
-
-export default AdminPageClass;
